@@ -78,6 +78,12 @@ if (reduce) {
     return [...t].map((c) => { const s = document.createElement('span'); s.className = 'ch'; s.textContent = c; el.append(s); return s; });
   };
 
+  // heavy, invisible set-up (scroll triggers, re-measuring the page) waits until the headline has landed,
+  // so it never steals frames from the entrance animation
+  let introDone!: () => void;
+  const intro = new Promise<void>((r) => { introDone = r; setTimeout(r, 1800); });
+  const whenIdle = (fn: () => void) => intro.then(() => ('requestIdleCallback' in window ? requestIdleCallback(() => fn(), { timeout: 600 }) : setTimeout(fn, 50)));
+
   /* ---------- page entrance: headline words tumble in ---------- */
   const h1 = document.querySelector<HTMLElement>('main h1');
   if (h1) {
@@ -86,7 +92,7 @@ if (reduce) {
     // Starts straight away (no delay); opacity eases quickly so nothing feels like it's waiting.
     gsap.set(words, { transformOrigin: '50% 90%' });
     const tilt = words.map(() => rand(-16, 16));
-    const tl = gsap.timeline({ paused: true })
+    const tl = gsap.timeline({ paused: true, onComplete: () => introDone() })
       .from(words, { yPercent: 70, rotation: (i: number) => tilt[i], scale: 0.86, duration: 0.85, ease: 'back.out(1.9)', stagger: 0.05 }, 0)
       .from(words, { opacity: 0, duration: 0.35, ease: 'power1.out', stagger: 0.05 }, 0);
     tl.progress(0.0001);                                  // words sit at their starting pose (invisible) until we play
@@ -97,7 +103,7 @@ if (reduce) {
       if (vt) { try { await vt.ready; } catch { /* skipped */ } await new Promise((r) => setTimeout(r, 90)); }
       requestAnimationFrame(() => tl.play());
     });
-  } else document.documentElement.classList.remove('h1-wait');
+  } else { document.documentElement.classList.remove('h1-wait'); setTimeout(() => introDone(), 300); }
   gsap.from($('main section:first-of-type :is(.t-overline, .lede, .t-body-lg, .badges, .nl, .intro-text > p)'), { y: 12, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.06, delay: 0.2 });
 
   // "birds" flaps its letters on a loop, and hops when you hover it
@@ -129,8 +135,11 @@ if (reduce) {
   const drift = (els: HTMLElement[], from: number, to: number) => els.forEach((el) =>
     gsap.fromTo(el, { y: from }, { y: to, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } }));
   const later = (sel: string) => $(`main section:not(:first-of-type) :is(${sel})`);
-  drift(later('h2, .t-overline').filter((el) => !el.closest('.card, .soon')), 12, -12);
-  drift(later('.t-body-lg, .t-body-md').filter((el) => !el.closest('.card, .soon, .row, .top')), 8, -8);
+  whenIdle(() => {
+    drift(later('h2, .t-overline').filter((el) => !el.closest('.card, .soon')), 12, -12);
+    drift(later('.t-body-lg, .t-body-md').filter((el) => !el.closest('.card, .soon, .row, .top')), 8, -8);
+    ScrollTrigger.refresh();
+  });
 
   /* ---------- buttons burst into feathers (and chirp) when pressed ---------- */
   const FEATHER = '<svg viewBox="0 0 24 24"><path class="vane" d="M19 3C11 4 6 9 5 17l2 1c6-1 11-6 12-15Z"/><path class="rachis" d="M4 21 16 7"/></svg>';
@@ -188,5 +197,5 @@ if (reduce) {
   });
 
   // images that load late shift layouts — keep trigger positions honest
-  addEventListener('load', () => { ScrollTrigger.refresh(); setTimeout(() => ScrollTrigger.refresh(), 1600); });
+  addEventListener('load', () => { whenIdle(() => ScrollTrigger.refresh()); setTimeout(() => whenIdle(() => ScrollTrigger.refresh()), 1600); });
 }
