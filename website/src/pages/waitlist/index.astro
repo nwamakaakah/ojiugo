@@ -17,7 +17,7 @@ import Arrow from '../../components/Arrow.astro';
         <input class="input" id="waitlist-email" name="email" type="email" autocomplete="email" required aria-describedby="waitlist-msg" />
         <span class="t-body-sm msg" id="waitlist-msg" role="alert"></span>
       </label>
-      <button class="btn t-button" type="submit">join waitlist <Arrow /></button>
+      <button class="btn t-button" type="submit" disabled>join waitlist <Arrow /></button>
     </form>
   </section>
 </Base>
@@ -32,7 +32,10 @@ import Arrow from '../../components/Arrow.astro';
     if (!input.value || !input.checkValidity()) { msg.textContent = 'that email doesn’t look quite right'; input.setAttribute('aria-invalid', 'true'); input.focus(); return; }
     window.location.href = '/waitlist/success';
   });
-  input.addEventListener('input', () => { msg.textContent = ''; input.removeAttribute('aria-invalid'); });
+  const btn = form.querySelector<HTMLButtonElement>('button')!;
+  const sync = () => { btn.disabled = !(input.value.trim() && input.checkValidity()); };
+  input.addEventListener('input', () => { msg.textContent = ''; input.removeAttribute('aria-invalid'); sync(); });
+  sync();
 </script>
 
 <style>

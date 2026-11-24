@@ -81,7 +81,16 @@ button, input, select { font: inherit; color: inherit; }
 }
 .btn:hover { background: var(--action-primary-hover); }
 .btn .icon { padding: 4px 0; display: flex; align-items: flex-end; }
-.btn .icon img { width: 18.16px; height: 10px; }
+.btn .icon .arrow { display: block; width: 18.16px; height: 10px; background: currentColor;
+  -webkit-mask: url(/icons/arrow.svg) no-repeat center / contain; mask: url(/icons/arrow.svg) no-repeat center / contain; }
+
+/* quieter button: a soft sage tint instead of the solid fill (newsletter) */
+.btn-soft { background: #e6e8df; color: var(--text-interactive); box-shadow: inset 0 0 0 1px #c9cfbd; }
+.btn-soft:hover { background: #dcdfd3; }
+
+/* not ready yet (e.g. no email typed): greyed out and can't be pressed */
+.btn:disabled, .btn[aria-disabled='true'] { background: var(--bg-desk); color: var(--text-disabled); box-shadow: none; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--bg-desk); }
 
 /* glass pill (nav, back, carousel arrows) */
 .pill {

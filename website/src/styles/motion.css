@@ -17,8 +17,8 @@ main { animation: oj-fade-in 240ms ease-out both; }
 
 /* buttons: lift on hover, settle on press, arrow nudges forward */
 .btn, .get, .badge, .add, .tab { transition: background-color .2s ease, transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s ease, opacity .7s cubic-bezier(.2, .7, .2, 1); }
-.btn:hover, .get:hover, .badge:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(68, 73, 54, .16); }
-.btn:active, .get:active, .badge:active, .add:active { transform: translateY(0) scale(.97); box-shadow: none; transition-duration: .08s; }
+.btn:not(:disabled):hover, .get:hover, .badge:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(68, 73, 54, .16); }
+.btn:not(:disabled):active, .get:active, .badge:active, .add:active { transform: translateY(0) scale(.97); box-shadow: none; transition-duration: .08s; }
 .btn .icon { transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
 .btn:hover .icon { transform: translateX(4px); }
 

@@ -13,7 +13,7 @@ const { id } = Astro.props;
       <span class="t-label">YOUR EMAIL</span>
       <input class="input" id={id} name="email" type="email" autocomplete="email" required />
     </label>
-    <button class="btn t-button nl-btn" type="submit">get notified <Arrow /></button>
+    <button class="btn btn-soft t-button nl-btn" type="submit" disabled>get notified <Arrow /></button>
   </form>
   <p class="t-body-sm nl-msg" role="status" aria-live="polite"></p>
 </div>
@@ -22,11 +22,17 @@ const { id } = Astro.props;
   // TODO: connect to your email provider (Buttondown, ConvertKit, Mailchimp…).
   document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
     const msg = form.parentElement!.querySelector<HTMLElement>('.nl-msg')!;
+    const field = form.querySelector<HTMLInputElement>('input')!;
+    const btn = form.querySelector<HTMLButtonElement>('button')!;
+    // the button only wakes up once there's a proper-looking email in the box
+    const sync = () => { btn.disabled = !(field.value.trim() && field.checkValidity()); };
+    field.addEventListener('input', () => { sync(); if (msg.dataset.state === 'error') { msg.textContent = ''; delete msg.dataset.state; } });
+    sync();
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const input = form.querySelector<HTMLInputElement>('input')!;
       if (!input.value || !input.checkValidity()) { msg.textContent = 'that email doesn’t look quite right'; msg.dataset.state = 'error'; input.focus(); return; }
-      msg.textContent = 'lovely — your first letter is on its way soon.'; msg.dataset.state = 'ok'; form.reset();
+      msg.textContent = 'lovely — your first letter is on its way soon.'; msg.dataset.state = 'ok'; form.reset(); sync();
     });
   });
 </script>

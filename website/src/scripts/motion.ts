@@ -113,9 +113,9 @@ if (reduce) {
     // the wing-flap: letters lift and tilt one way, swing to the other, then bounce back to rest.
     // Same moves as before, but every step glides (sine in/out) and the bounce is softer, so nothing snaps.
     let busy = false;
-    const flap = () => {
+    const flap = (sing = true) => {
       if (busy) return; busy = true;
-      chirp();
+      if (sing) chirp();
       gsap.timeline({ onComplete: () => { busy = false; } })
         .to(chars, { y: -6, rotation: (i) => (i % 2 ? 9 : -9), duration: 0.24, ease: 'sine.out', stagger: 0.03 })
         .to(chars, { y: -2, rotation: (i) => (i % 2 ? -6 : 6), duration: 0.26, ease: 'sine.inOut', stagger: 0.03 }, '-=0.1')
