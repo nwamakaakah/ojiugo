@@ -126,3 +126,11 @@ export const type = {
 export const space = { none: 0, '2xs': 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 24, '2xl': 32, '3xl': 48, '4xl': 64 };
 export const radius = { none: 0, xs: 4, sm: 8, md: 12, lg: 16, xl: 24, pill: 999 };
 export const control = { sm: 32, md: 40, lg: 48, touchMin: 48 };
+
+/** Feeling chips (joyful · awe · calm · wonder · proud) — each sits on its own colour ramp. */
+export const FEELING_RAMP = { joyful: 'plum', awe: 'gold', calm: 'rose', wonder: 'terracotta', proud: 'sage' } as const;
+export function feelingColors(feeling: keyof typeof FEELING_RAMP, appearance: Appearance) {
+  const r = primitives[FEELING_RAMP[feeling]];
+  const d = appearance === 'daylight';
+  return { fill: d ? r['100'] : r['800'], ring: d ? r['600'] : r['300'], label: d ? r['800'] : r['100'], onFill: d ? r['700'] : r['300'], onLabel: d ? sand['25'] : sand['950'] };
+}

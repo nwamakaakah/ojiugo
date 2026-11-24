@@ -15,7 +15,8 @@
       "package": "com.ojiugo.app",
       "adaptiveIcon": {
         "backgroundColor": "#F7F2E6",
-        "foregroundImage": "./assets/images/android-icon-foreground.png"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       }
     },
     "web": {

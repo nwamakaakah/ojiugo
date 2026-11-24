@@ -1,5 +1,6 @@
 import { Children, Fragment, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Toggle } from './form';
 import { SvgXml } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space } from '../theme/tokens';
@@ -51,12 +52,7 @@ export function ToggleRow({ title, value, onChange }: { title: string; value: bo
     <View style={styles.row}>
       <T v="ui" style={{ flex: 1 }}>{title}</T>
       <T v="caption" color={colors.textLight}>{value ? 'on' : 'off'}</T>
-      <Switch
-        value={value} onValueChange={onChange} accessibilityLabel={title}
-        trackColor={{ true: colors.actionPrimary, false: colors.softNeutralFill }}
-        thumbColor={colors.surfacePage} ios_backgroundColor={colors.softNeutralFill}
-        {...({ activeThumbColor: colors.surfacePage } as object)}
-      />
+      <Toggle value={value} onChange={onChange} label={title} />
     </View>
   );
 }

@@ -44,3 +44,26 @@ const birdXml = `<svg viewBox="0 0 220 90" xmlns="http://www.w3.org/2000/svg">
 export function PeekingBird({ width = 220 }: { width?: number }) {
   return <SvgXml xml={birdXml} width={width} height={width * (90 / 220)} />;
 }
+
+// Calls / Empty State — a round bird asleep on a branch.
+const sleepyXml = `<svg viewBox="0 0 240 110" xmlns="http://www.w3.org/2000/svg">
+<path d="M6 96c60-4 150-5 228-6" stroke="#8a6a4c" stroke-width="4" stroke-linecap="round" fill="none"/>
+<ellipse cx="116" cy="70" rx="38" ry="27" fill="#8a6a4c" stroke="#b67a3f" stroke-width="3"/>
+<path d="M96 56c12-6 32-6 44 2" stroke="#c98b4a" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M138 60l9-2-6 7" fill="#c98b4a"/>
+<path d="M107 66c3-4 8-4 11 0" stroke="#221d17" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+<text x="150" y="38" font-family="Georgia, serif" font-size="18" fill="#8a6a4c">z</text>
+<text x="162" y="24" font-family="Georgia, serif" font-size="12" fill="#8a6a4c">z</text></svg>`;
+export function SleepingBird({ width = 240 }: { width?: number }) {
+  return <SvgXml xml={sleepyXml} width={width} height={width * (110 / 240)} />;
+}
+
+// Collection / Empty State — an empty nest bowl.
+const bowlXml = `<svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 26c30-18 174-18 204 0-6 44-46 74-102 74S14 70 8 26Z" fill="#e9e3d3" stroke="#8a6a4c" stroke-width="5" stroke-linejoin="round"/>
+<path d="M10 28c40 10 160 10 200-2" stroke="#c98b4a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M22 40c30 14 90 16 150 6" stroke="#8a6a4c" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M14 54c26 6 60 8 98 6" stroke="#8a6a4c" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+export function EmptyNest({ width = 210 }: { width?: number }) {
+  return <SvgXml xml={bowlXml} width={width} height={width * (110 / 220)} />;
+}

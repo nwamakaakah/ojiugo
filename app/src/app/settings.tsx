@@ -67,7 +67,7 @@ export default function Settings() {
             <T v="ui">sign out</T>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={confirmDelete} style={{ alignSelf: 'center', padding: space.sm }}>
-            <T v="ui" color={colors.textSubtle}>delete account</T>
+            <T v="ui" color={colors.textCritical}>delete account</T>
           </Pressable>
         </View>
       </ScrollView>

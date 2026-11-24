@@ -31,7 +31,7 @@ export default function Profile() {
           <T v="bodyMd" color={colors.textSubtle}>
             {isNew ? 'brand new diary' : `keeping this diary since ${user?.createdAt ? monthYear(user.createdAt) : 'today'}`}
           </T>
-          <View style={[styles.rank, { borderColor: colors.borderSubtle, backgroundColor: colors.surfacePage }]}>
+          <View style={[styles.rank, { borderColor: colors.borderDefault }]}>
             <T v="ui">{rank}</T>
             <ArrowIcon color={colors.iconDefault} />
           </View>
@@ -41,7 +41,7 @@ export default function Profile() {
           {[[stats.species, 'species met'], [stats.sightings, 'sightings'], [stats.thisWeek, 'this week']].map(([n, l]) => (
             <View key={l} style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
               <T v="title" style={{ fontSize: 30, lineHeight: 36 }}>{String(n)}</T>
-              <T v="overline" color={colors.textLight}>{l}</T>
+              <T v="caption" color={colors.textSubtle} style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>{l}</T>
             </View>
           ))}
         </View>
@@ -53,7 +53,7 @@ export default function Profile() {
             return (
               <Pressable key={m.id} disabled={!got} onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
                 style={[styles.milestone, { backgroundColor: colors.surfacePage }]} accessibilityLabel={`${m.title}, ${got ? 'earned' : 'yet to come'}`}>
-                {got ? <Stamp color={m.colorKey} size={28} /> : <View style={[styles.empty, { borderColor: colors.borderSubtle }]} />}
+                {got ? <Stamp color={m.colorKey} size={32} /> : <View style={[styles.empty, { borderColor: colors.borderDefault }]} />}
                 <View style={{ flex: 1, gap: 2 }}>
                   <T v="ui" color={got ? colors.textDefault : colors.textSubtle}>{m.title}</T>
                   <T v="caption" color={colors.textLight}>
@@ -72,8 +72,8 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
   nest: { alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingTop: space.lg },
-  rank: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, height: 32, borderRadius: radius.pill, borderWidth: 1, marginTop: space.xs },
+  rank: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, height: 34, borderRadius: radius.pill, borderWidth: 1, borderStyle: 'dashed', marginTop: space.xs },
   stat: { flex: 1, alignItems: 'center', gap: space.sm, paddingVertical: space.lg, borderRadius: radius.lg },
   milestone: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingVertical: space.md, borderRadius: radius.md },
-  empty: { width: 28, height: 28, borderRadius: 14, borderWidth: 1 },
+  empty: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderStyle: 'dashed' },
 });
