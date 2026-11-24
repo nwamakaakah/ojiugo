@@ -8,21 +8,20 @@ import type { Feeling } from '../lib/entries';
 import { T } from './ui';
 import { Boing } from './motion';
 import { Icon } from './Icon';
-import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, interpolateColor, useAnimatedStyle, useDerivedValue, withTiming } from 'react-native-reanimated';
 
 /** Toggle from the Figma "notifications" row: action/primary track, text/on-primary knob. */
 export function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: boolean) => void; label: string }) {
   const { colors } = useTheme();
-  const t = useDerivedValue(() => withSpring(value ? 1 : 0, { damping: 14, stiffness: 260 }), [value]);
+  const t = useDerivedValue(() => withTiming(value ? 1 : 0, { duration: 180, easing: Easing.out(Easing.quad) }), [value]);
   const off = colors.softNeutralFill, on = colors.actionPrimary, kOff = colors.surfacePage, kOn = colors.textOnPrimary;
   const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(t.value, [0, 1], [off, on]) }));
-  // the knob slides across and squashes a little on the way, like a pebble rolling
   const knob = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(t.value, [0, 1], [kOff, kOn]),
-    transform: [{ translateX: t.value * 18 }, { scaleX: 1 + Math.sin(Math.PI * Math.min(Math.max(t.value, 0), 1)) * 0.25 }],
+    transform: [{ translateX: t.value * 18 }],
   }));
   return (
-    <Pressable haptic sink={0.92} accessibilityRole="switch" accessibilityLabel={label} accessibilityState={{ checked: value }} onPress={() => onChange(!value)} hitSlop={8}
+    <Pressable haptic sink={1} accessibilityRole="switch" accessibilityLabel={label} accessibilityState={{ checked: value }} onPress={() => onChange(!value)} hitSlop={8}
       style={styles.track}>
       <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: 14 }, track]} />
       <Animated.View style={[styles.knob, knob]} />

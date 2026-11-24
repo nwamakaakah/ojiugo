@@ -32,6 +32,10 @@ function chirp() {
   } catch { /* no audio, no problem */ }
 }
 
+// browsers keep pages silent until the first click/tap/key — wake the chirp then
+const wake = () => { try { ac ??= new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch { /* */ } };
+['pointerdown', 'keydown', 'touchstart'].forEach((t) => addEventListener(t, wake, { once: true, passive: true }));
+
 // header shadow after a little scroll (cheap, always on)
 const onScroll = () => document.documentElement.classList.toggle('is-scrolled', scrollY > 24);
 addEventListener('scroll', onScroll, { passive: true }); onScroll();
@@ -78,17 +82,35 @@ if (reduce) {
   const h1 = document.querySelector<HTMLElement>('main h1');
   if (h1) {
     const words = splitWords(h1);
-    gsap.from(words, { yPercent: 120, rotate: () => rand(-14, 14), opacity: 0, duration: 0.9, ease: 'back.out(2.2)', stagger: 0.06, delay: 0.1 });
+    // tumble in: each word drops from a little below with a tilt and lands with a soft bounce.
+    // Starts straight away (no delay); opacity eases quickly so nothing feels like it's waiting.
+    gsap.set(words, { transformOrigin: '50% 90%' });
+    gsap.from(words, { yPercent: 70, rotation: () => rand(-16, 16), scale: 0.86, duration: 0.85, ease: 'back.out(1.9)', stagger: 0.05 });
+    gsap.from(words, { opacity: 0, duration: 0.35, ease: 'power1.out', stagger: 0.05 });
   }
-  gsap.from($('main section:first-of-type :is(.t-overline, .lede, .t-body-lg, .badges, .nl, .intro-text > p)'), { y: 24, opacity: 0, duration: 0.8, ease: 'power3.out', stagger: 0.08, delay: 0.35 });
+  document.documentElement.classList.remove('h1-wait');
+  gsap.from($('main section:first-of-type :is(.t-overline, .lede, .t-body-lg, .badges, .nl, .intro-text > p)'), { y: 12, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.06, delay: 0.2 });
 
   // "birds" flaps its letters on a loop, and hops when you hover it
   $('.birds').forEach((el) => {
     const chars = splitChars(el);
-    gsap.to(chars, { y: -6, rotate: (i) => (i % 2 ? 8 : -8), duration: 0.35, ease: 'sine.inOut', yoyo: true, repeat: 1, stagger: 0.06, repeatDelay: 0, delay: 1.4,
-      onComplete() { gsap.delayedCall(4, () => this.restart(true)); } });
-    const hop = () => { chirp(); gsap.fromTo(chars, { y: 0 }, { y: -14, rotate: () => rand(-20, 20), duration: 0.25, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.04 }); };
-    el.addEventListener('mouseenter', hop); el.addEventListener('click', hop);
+    gsap.set(chars, { transformOrigin: '50% 100%' });
+    // a quick double wing-flap: letters lift and tilt left/right, then settle with a little bounce
+    let busy = false;
+    const flap = (sing = true) => {
+      if (busy) return; busy = true;
+      if (sing) chirp();
+      gsap.timeline({ onComplete: () => { busy = false; } })
+        .to(chars, { y: -6, rotation: (i) => (i % 2 ? 9 : -9), duration: 0.13, ease: 'power2.out', stagger: 0.025 })
+        .to(chars, { y: -2, rotation: (i) => (i % 2 ? -6 : 6), duration: 0.12, ease: 'sine.inOut', stagger: 0.025 })
+        .to(chars, { y: 0, rotation: 0, duration: 0.45, ease: 'back.out(2.6)', stagger: 0.025 });
+    };
+    el.addEventListener('mouseenter', () => flap()); el.addEventListener('click', () => flap());
+    // …and on its own every few seconds while it's on screen (it can only chirp once the visitor has clicked or tapped somewhere — browsers keep pages silent until then)
+    let seen = false;
+    new IntersectionObserver(([e]) => { seen = e.isIntersecting; }).observe(el);
+    const again = () => setTimeout(() => { if (seen && !document.hidden) flap(); again(); }, rand(3800, 6200));
+    setTimeout(() => { if (seen) flap(false); again(); }, 1400);
   });
 
   /* ---------- below the first screen: just parallax ---------- */

@@ -23,7 +23,9 @@ export function roomy(s: TextStyle): TextStyle {
     includeFontPadding: false,
     ...(s.lineHeight != null && s.lineHeight < min ? { lineHeight: min } : null),
     // centred text fills its row, so iOS can't measure it a hair too narrow and hide the last word on a clipped second line
-    ...(s.textAlign === 'center' && s.alignSelf == null && s.position !== 'absolute' ? { alignSelf: 'stretch' as const } : null),
+    ...(s.textAlign === 'center' && s.alignSelf == null && s.position !== 'absolute' && s.width == null
+      ? (typeof s.maxWidth === 'number' ? { alignSelf: 'center' as const, width: s.maxWidth } : { alignSelf: 'stretch' as const })
+      : null),
   };
 }
 

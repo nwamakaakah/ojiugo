@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { T } from './ui';
@@ -17,6 +18,17 @@ const C = {
 const foliage = require('../../assets/images/share-foliage.png');
 const RULES = [40, 86, 132, 178, 224, 270, 316, 361, 407]; // ruled lines, from the top of the page
 
+/** The foliage behind the page drifts a touch from side to side, like a breeze (oversized slightly so its edges never show). */
+function Breeze({ u }: { u: number }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withRepeat(withTiming(1, { duration: 3400, easing: Easing.inOut(Easing.sin) }), -1, true);
+    return () => cancelAnimation(v);
+  }, [v]);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: 1.05 }, { translateX: (-3 + v.value * 6) * u }, { rotate: `${-0.6 + v.value * 1.2}deg` }] }));
+  return <Animated.Image source={foliage} style={[StyleSheet.absoluteFill, style]} resizeMode="stretch" />;
+}
+
 /** The shareable "meet my feathered friend" card. Give it the width it should fill. */
 export function BirdieCard({ entry, blurb, width }: { entry: Entry; blurb?: string; width?: number }) {
   const [measured, setMeasured] = useState(W);
@@ -26,7 +38,7 @@ export function BirdieCard({ entry, blurb, width }: { entry: Entry; blurb?: stri
   return (
     <View onLayout={width ? undefined : (e) => setMeasured(e.nativeEvent.layout.width)}
       style={{ width: width ?? '100%', height: H * u, backgroundColor: C.frame, overflow: 'hidden' }}>
-      <Image source={foliage} style={StyleSheet.absoluteFill} resizeMode="stretch" />
+      <Breeze u={u} />
 
       {/* the page */}
       <View style={{ position: 'absolute', left: 16 * u, top: 58 * u, width: 360 * u, height: 454 * u, backgroundColor: C.page,

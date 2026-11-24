@@ -33,7 +33,7 @@ export default function Settings() {
     toast({ text: v ? 'notifications turned on' : 'notifications turned off', kind: 'bell', tone: v ? 'on' : 'off' });
   };
   const confirmDelete = async () => {
-    const ok = await confirm({ title: 'delete your diary?', body: 'this tears out every page for good — your entries can’t be brought back.', cancel: 'keep it', confirm: 'delete my diary', tone: 'critical' });
+    const ok = await confirm({ title: 'delete your diary?', body: 'this can’t be undone — every page and photo in your diary is gone for good', cancel: 'keep it', confirm: 'yes, delete it', tone: 'critical' });
     if (!ok) return;
     const r = await deleteAccount(); if (!r.error) router.replace('/welcome'); else toast({ text: r.error });
   };

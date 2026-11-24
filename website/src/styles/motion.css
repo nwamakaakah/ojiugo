@@ -3,15 +3,16 @@
 
 /* page changes: a soft cross-fade with a slight rise (browsers that support cross-document view transitions) */
 @view-transition { navigation: auto; }
-::view-transition-old(root) { animation: 260ms cubic-bezier(.4, 0, .2, 1) both oj-page-out; }
-::view-transition-new(root) { animation: 420ms cubic-bezier(.2, .7, .2, 1) 60ms both oj-page-in; }
+::view-transition-old(root) { animation: 180ms ease-out both oj-fade-out; }
+::view-transition-new(root) { animation: 240ms ease-out both oj-fade-in; }
 .site-header { view-transition-name: oj-header; }          /* header stays put while the page changes */
 ::view-transition-group(oj-header) { animation-duration: 0s; }
-@keyframes oj-page-out { to { opacity: 0; transform: translateY(-6px); } }
-@keyframes oj-page-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes oj-fade-out { to { opacity: 0; } }
+@keyframes oj-fade-in { from { opacity: 0; } }
+@keyframes oj-page-in { from { opacity: 0; transform: translateY(8px); } }
 
 /* first paint of a page (also covers browsers without view transitions) */
-main { animation: oj-page-in 520ms cubic-bezier(.2, .7, .2, 1) both; }
+main { animation: oj-fade-in 240ms ease-out both; }
 
 /* buttons: lift on hover, settle on press, arrow nudges forward */
 .btn, .get, .badge, .add, .tab { transition: background-color .2s ease, transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s ease, opacity .7s cubic-bezier(.2, .7, .2, 1); }
@@ -52,6 +53,7 @@ html.lenis, html.lenis body { height: auto; }
 
 /* split text pieces */
 .w, .ch { display: inline-block; will-change: transform; }
+.h1-wait main h1 { visibility: hidden; }
 h1 .w, h2 .w { padding-bottom: .06em; }
 .birds { display: inline-block; cursor: pointer; }
 .gap { display: inline-block; width: .28em; }

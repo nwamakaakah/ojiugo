@@ -1,6 +1,6 @@
 import { forwardRef, useState, type ComponentRef } from 'react';
 import { Platform, Pressable, type PressableProps, type PressableStateCallbackType, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -13,8 +13,8 @@ export type PressProps = Omit<PressableProps, 'style'> & {
   haptic?: boolean;
 };
 
-/** Drop-in Pressable that sinks with a spring when touched and bounces back on release. */
-export const Press = forwardRef<ComponentRef<typeof Pressable>, PressProps>(function Press({ style, sink = 0.96, haptic, onPressIn, onPressOut, onPress, disabled, ...rest }, ref) {
+/** Drop-in Pressable that dips very slightly while pressed. */
+export const Press = forwardRef<ComponentRef<typeof Pressable>, PressProps>(function Press({ style, sink = 0.98, haptic, onPressIn, onPressOut, onPress, disabled, ...rest }, ref) {
   const s = useSharedValue(1);
   const [pressed, setPressed] = useState(false);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
@@ -24,8 +24,8 @@ export const Press = forwardRef<ComponentRef<typeof Pressable>, PressProps>(func
       ref={ref}
       {...rest}
       disabled={disabled}
-      onPressIn={(e) => { setPressed(true); s.value = withSpring(sink, { damping: 15, stiffness: 420 }); onPressIn?.(e); }}
-      onPressOut={(e) => { setPressed(false); s.value = withSpring(1, { damping: 9, stiffness: 260 }); onPressOut?.(e); }}
+      onPressIn={(e) => { setPressed(true); s.value = withTiming(sink, { duration: 90, easing: Easing.out(Easing.quad) }); onPressIn?.(e); }}
+      onPressOut={(e) => { setPressed(false); s.value = withTiming(1, { duration: 160, easing: Easing.out(Easing.quad) }); onPressOut?.(e); }}
       onPress={(e) => { if (haptic && Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {}); onPress?.(e); }}
       style={[resolved, anim]}
     />

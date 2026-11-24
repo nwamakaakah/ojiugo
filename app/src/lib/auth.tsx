@@ -31,6 +31,7 @@ const friendly = (msg?: string) => {
   if (m.includes('invalid login')) return 'that email and password don’t match a diary yet';
   if (m.includes('already registered') || m.includes('already exists')) return 'there’s already a diary with this email, try opening it';
   if (m.includes('token') || m.includes('otp')) return 'that code didn’t work, check it or ask for a new one';
+  if (m.includes('delete_my_account') || m.includes('could not find the function')) return 'the diary database isn’t set up yet — run schema.sql in Supabase first';
   if (m.includes('password')) return msg;
   return msg;
 };

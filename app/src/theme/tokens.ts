@@ -68,6 +68,7 @@ export function resolveColors(season: Season, appearance: Appearance) {
     textOnPrimary: pick(sand['25'], sand['950']),
     textInteractive: pick(p['700'], p['300']),
     textCritical: pick(primitives.blush['700'], primitives.blush['300']),
+    actionCritical: pick(primitives.blush['800'], primitives.blush['600']),   // filled destructive button (Figma: tear this page out?)
     textSuccess: pick(primitives.sage['700'], primitives.sage['300']),
     textJoy: pick(primitives.gold['700'], primitives.gold['300']),
     textWonder: pick(primitives.plum['700'], primitives.plum['300']),

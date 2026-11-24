@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing } from 'react-native';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
 import { eyeSvg } from './svgs';
 
@@ -14,24 +15,49 @@ const leavesXml = `<svg viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg"
 ${leaf(30, 45, -62, '#c4703f', '#854e2c')}${leaf(62, 30, -70, '#96a186', '#575f47')}${leaf(98, 34, 18, '#9ca490', '#575f47')}
 ${leaf(40, 88, 6, '#cf8c64', '#854e2c')}${leaf(100, 80, -68, '#d3b479', '#886e3d')}${leaf(118, 70, -60, '#c9a35a', '#886e3d')}</svg>`;
 
+/** Loading spins gently; elsewhere the leaves sway a touch, like a breeze. */
 export function Leaves({ size = 140, spin = true }: { size?: number; spin?: boolean }) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useSharedValue(0);
   useEffect(() => {
-    if (!spin) return;
-    const loop = Animated.loop(Animated.timing(v, { toValue: 1, duration: 2400, easing: Easing.inOut(Easing.quad), useNativeDriver: true }));
-    loop.start(); return () => loop.stop();
+    v.value = withRepeat(withTiming(1, { duration: spin ? 1200 : 2600, easing: Easing.inOut(Easing.sin) }), -1, true);
+    return () => cancelAnimation(v);
   }, [spin, v]);
-  const rotate = v.interpolate({ inputRange: [0, 0.5, 1], outputRange: ['-6deg', '6deg', '-6deg'] });
-  return <Animated.View style={{ transform: [{ rotate }] }}><SvgXml xml={leavesXml} width={size} height={size * (120 / 140)} /></Animated.View>;
+  const style = useAnimatedStyle(() => {
+    const a = spin ? 6 : 2.2;
+    return { transform: [{ translateY: size * 0.3 }, { rotate: `${-a + v.value * a * 2}deg` }, { translateX: spin ? 0 : -1.5 + v.value * 3 }, { translateY: -size * 0.3 }] };
+  });
+  return <Animated.View style={[{ width: size, height: size * (120 / 140) }, style]}><SvgXml xml={leavesXml} width={size} height={size * (120 / 140)} /></Animated.View>;
 }
 
-// Sparkles — "you're all set"
-const star = (x: number, y: number, s: number) =>
-  `<path transform="translate(${x} ${y}) scale(${s})" d="M0-20C2-6 6-2 20 0C6 2 2 6 0 20C-2 6-6 2-20 0C-6-2-2-6 0-20Z" fill="#d3b479" stroke="#886e3d" stroke-width="1.2" stroke-linejoin="round"/>`;
-const sparklesXml = `<svg viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg">${star(28, 52, 0.75)}${star(78, 32, 1)}${star(128, 58, 0.62)}
-<circle cx="102" cy="22" r="4" fill="#96a186"/><circle cx="60" cy="64" r="4" fill="#c4703f"/><circle cx="12" cy="82" r="3.5" fill="#a45f35"/><circle cx="72" cy="78" r="3" fill="#d3b479"/></svg>`;
+// Sparkles — "you're all set". Each star twinkles on its own beat.
+const STAR = 'M0-20C2-6 6-2 20 0C6 2 2 6 0 20C-2 6-6 2-20 0C-6-2-2-6 0-20Z';
+const starXml = `<svg viewBox="-22 -22 44 44" xmlns="http://www.w3.org/2000/svg"><path d="${STAR}" fill="#d3b479" stroke="#886e3d" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+const dotsXml = `<svg viewBox="0 0 160 90" xmlns="http://www.w3.org/2000/svg"><circle cx="102" cy="22" r="4" fill="#96a186"/><circle cx="60" cy="64" r="4" fill="#c4703f"/><circle cx="12" cy="82" r="3.5" fill="#a45f35"/><circle cx="72" cy="78" r="3" fill="#d3b479"/></svg>`;
+const STARS = [{ x: 28, y: 52, s: 0.75, d: 0 }, { x: 78, y: 32, s: 1, d: 700 }, { x: 128, y: 58, s: 0.62, d: 1300 }];
+
+function Twinkle({ k, x, y, s, d }: { k: number; x: number; y: number; s: number; d: number }) {
+  const v = useSharedValue(0);
+  useEffect(() => {
+    v.value = withDelay(d, withRepeat(withSequence(
+      withTiming(1, { duration: 520, easing: Easing.out(Easing.quad) }),
+      withTiming(0, { duration: 700, easing: Easing.inOut(Easing.quad) }),
+      withTiming(0, { duration: 900 }),
+    ), -1));
+    return () => cancelAnimation(v);
+  }, [d, v]);
+  const style = useAnimatedStyle(() => ({ opacity: 0.55 + v.value * 0.45, transform: [{ scale: 0.9 + v.value * 0.14 }, { rotate: `${v.value * 12}deg` }] }));
+  const size = 44 * s * k;
+  return <Animated.View style={[{ position: 'absolute', left: (x - 22 * s) * k, top: (y - 22 * s) * k, width: size, height: size }, style]}><SvgXml xml={starXml} width={size} height={size} /></Animated.View>;
+}
+
 export function Sparkles({ width = 180 }: { width?: number }) {
-  return <SvgXml xml={sparklesXml} width={width} height={width * (90 / 160)} />;
+  const k = width / 160;
+  return (
+    <View style={{ width, height: width * (90 / 160) }}>
+      <SvgXml xml={dotsXml} width={width} height={width * (90 / 160)} style={{ position: 'absolute' }} />
+      {STARS.map((st, i) => <Twinkle key={i} k={k} {...st} />)}
+    </View>
+  );
 }
 
 // Bird peeking over a branch — "Entries / Empty State"

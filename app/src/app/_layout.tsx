@@ -23,8 +23,8 @@ function Root() {
     <>
       <StatusBar style={colors.isDark ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp }, animation: 'ios_from_right', animationDuration: 320 }}>
-        {/* the four tabs cross-fade so the nav bar stays put */}
-        {TABS.map((n) => <Stack.Screen key={n} name={n} options={{ animation: 'fade', animationDuration: 200 }} />)}
+        {/* the four tabs switch in place so the nav bar never moves or flickers; their content rises in on its own */}
+        {TABS.map((n) => <Stack.Screen key={n} name={n} options={{ animation: 'none' }} />)}
         {/* writing in the diary rises up like opening a notebook */}
         {SHEETS.map((n) => <Stack.Screen key={n} name={n} options={{ animation: 'slide_from_bottom', animationDuration: 380 }} />)}
         {/* little celebrations and confirmations fade up softly */}

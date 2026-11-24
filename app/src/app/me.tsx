@@ -41,7 +41,7 @@ export default function Profile() {
 
         <View style={{ flexDirection: 'row', gap: space.sm }}>
           {[[stats.species, 'species met'], [stats.sightings, 'sightings'], [stats.thisWeek, 'this week']].map(([n, l], i) => (
-            <Pop key={l} delay={120 + i * 70} style={{ flex: 1 }}><View style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
+            <Pop key={l} delay={i * 30} style={{ flex: 1 }}><View style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
               <T v="title" style={{ fontSize: 30, lineHeight: 36 }}>{String(n)}</T>
               <T v="caption" color={colors.textSubtle} style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>{l}</T>
             </View></Pop>
@@ -53,7 +53,7 @@ export default function Profile() {
           {MILESTONES.map((m, i) => {
             const got = stats.earned[m.id];
             return (
-              <Rise key={m.id} i={i} delay={250}>
+              <Rise key={m.id} i={i} delay={60}>
               <Pressable disabled={!got} onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
                 style={[styles.milestone, { backgroundColor: colors.surfacePage }]} accessibilityLabel={`${m.title}, ${got ? 'earned' : 'yet to come'}`}>
                 {got ? <Stamp color={m.colorKey} size={32} /> : <View style={[styles.empty, { borderColor: colors.borderDefault }]} />}

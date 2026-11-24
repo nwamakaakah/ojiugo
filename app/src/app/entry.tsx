@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
+import * as Sharing from 'expo-sharing';
 import { BackLink, T } from '../components/ui';
 import { Rise } from '../components/motion';
 import { BirdThumb } from '../components/BirdThumb';
@@ -12,6 +13,8 @@ import { BirdieCard } from '../components/BirdieCard';
 import { FeelingChip, Stamp } from '../components/form';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/Confirm';
+import { Scrim } from '../components/Scrim';
+import { cue } from '../lib/feedback';
 import { BREEDING, deleteEntry, stampTime, useEntry } from '../lib/entries';
 import { speciesInfo } from '../lib/species';
 import { SEASON_NAME } from '../lib/countries';
@@ -36,17 +39,26 @@ export default function EntryDetail() {
   const sing = BREEDING.find(([c]) => c === e.breeding?.[0]);
 
   const tear = async () => {
-    const ok = await confirm({ title: 'tear out this page?', body: 'this page will be crumpled up for good — it can’t be smoothed out again.', cancel: 'keep it', confirm: 'tear it out', tone: 'critical' });
-    if (ok) { await deleteEntry(e.id); router.replace('/torn'); }
+    const ok = await confirm({ title: 'tear this page out?', body: 'this can’t be undone — the sighting and its page are gone for good', cancel: 'keep it', confirm: 'yes, tear it out', tone: 'critical' });
+    if (ok) { cue('tear'); await deleteEntry(e.id); router.replace('/torn'); }
   };
   const download = async () => {
     try {
       if (Platform.OS === 'web') { toast({ text: 'saving cards works in the phone app' }); return; }
-      const perm = await MediaLibrary.requestPermissionsAsync(true);
-      if (!perm.granted) return toast({ text: 'allow photo access to save your card' });
-      const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
-      await MediaLibrary.saveToLibraryAsync(uri);
-      setSharing(false); router.push('/stamp-saved');
+      const uri = await captureRef(cardRef, { format: 'png', quality: 1, result: 'tmpfile' });
+      // save straight to Photos; if the phone won't allow that (e.g. in Expo Go), open the share sheet instead,
+      // where "Save image" and WhatsApp etc. are one tap away
+      let saved = false;
+      try {
+        const perm = await MediaLibrary.requestPermissionsAsync(true, ['photo']);
+        if (perm.granted) { await MediaLibrary.saveToLibraryAsync(uri); saved = true; }
+      } catch { saved = false; }
+      if (!saved) {
+        if (!(await Sharing.isAvailableAsync())) return toast({ text: 'allow photo access to save your card' });
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'save your birdie card', UTI: 'public.png' });
+      }
+      setSharing(false);
+      if (saved) setTimeout(() => router.push('/stamp-saved'), 350);
     } catch { toast({ text: 'couldn’t save the card — try again?' }); }
   };
 
@@ -104,7 +116,8 @@ export default function EntryDetail() {
 
       {/* Entry / Detail - Identified Bird - Share Page (Figma 2012:10936) */}
       <Modal visible={sharing} transparent animationType="slide" onRequestClose={() => setSharing(false)}>
-        <View style={{ flex: 1, backgroundColor: colors.overlayScrim, justifyContent: 'flex-end' }}>
+        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+          <Scrim />
           <View style={{ backgroundColor: colors.surfacePage, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden', maxHeight: '96%' }}>
             <View style={{ paddingHorizontal: space.lg, paddingTop: 28, paddingBottom: 18, borderBottomWidth: 1, borderColor: colors.borderSubtle }}>
               <T v="displayLg" style={{ fontSize: 25, lineHeight: 30 }}>share your birdie card with others</T>
