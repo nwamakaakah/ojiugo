@@ -1,7 +1,9 @@
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { T } from '../components/ui';
+import { Rise } from '../components/motion';
 import { TabBar } from '../components/TabBar';
 import { BirdThumb } from '../components/BirdThumb';
 import { EmptyNest } from '../components/illustrations';
@@ -29,7 +31,8 @@ export default function Flocks() {
           data={species}
           keyExtractor={(s) => s.name}
           contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: space['2xl'], gap: space.md }}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
+            <Rise i={index}>
             <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/bird', params: { name: item.name } })}
               style={({ pressed }) => [styles.card, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow, opacity: pressed ? 0.8 : 1 }]}>
               <BirdThumb uri={item.photo} size={58} />
@@ -38,6 +41,7 @@ export default function Flocks() {
                 <T v="bodySm" color={colors.textLight}>first met {shortDate(item.firstMet)} • seen ×{item.seen}</T>
               </View>
             </Pressable>
+            </Rise>
           )}
         />
       )}

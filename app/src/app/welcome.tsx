@@ -12,7 +12,7 @@ export default function Welcome() {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg }}>
         <EyeLogo size={150} />
         <View style={{ alignItems: 'center', gap: space.xs }}>
-          <T v="displayLg">ọjịugo</T>
+          <T v="displayLg" style={{ textAlign: 'center' }}>ọjịugo</T>
           <T v="bodyMd" color={colors.textSubtle} style={{ textAlign: 'center', maxWidth: 260 }}>your cosy little journal for every feathered friend you meet</T>
         </View>
       </View>

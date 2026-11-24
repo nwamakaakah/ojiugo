@@ -7,7 +7,7 @@ import { radius, space } from '../theme/tokens';
 import { T } from './ui';
 
 type Kind = 'bell' | 'moon' | 'sun';
-type ToastMsg = { text: string; kind?: Kind; tone?: 'primary' | 'warm' };
+type ToastMsg = { text: string; kind?: Kind; tone?: 'primary' | 'warm' | 'on' | 'off' };
 const Ctx = createContext<(m: ToastMsg) => void>(() => {});
 export const useToast = () => useContext(Ctx);
 
@@ -32,8 +32,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     timer.current = setTimeout(() => Animated.timing(op, { toValue: 0, duration: 220, useNativeDriver: true }).start(() => setMsg(null)), 2200);
   }, [op]);
 
-  const bg = msg?.tone === 'warm' ? colors.toastWarm : colors.actionPrimary;
-  const fg = msg?.tone === 'warm' ? colors.toastWarmLabel : colors.textOnPrimary;
+  const t = msg?.tone;
+  const bg = t === 'warm' ? colors.toastWarm : t === 'on' ? colors.toastOn : t === 'off' ? colors.toastOff : colors.actionPrimary;
+  const fg = t === 'warm' ? colors.toastWarmLabel : t === 'on' || t === 'off' ? '#FDFAF1' : colors.textOnPrimary;
   return (
     <Ctx.Provider value={show}>
       {children}

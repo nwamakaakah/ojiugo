@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import * as Linking from 'expo-linking';
 import { supabase, isDemo } from './supabase';
+import { removeAllPhotos } from './sync';
 import { storage } from './storage';
 
 export type User = { id: string; email: string; name?: string; country?: string; createdAt?: string };
@@ -70,8 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user, ready, isDemo,
       async signUp(name, email, password) {
         if (supabase) {
-          const { error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
-          return { error: error ? friendly(error.message) : undefined };
+          // the confirm link goes to ojiugo.club/auth/callback, which hands the birder back to this app
+          const back = Linking.createURL('auth-callback');
+          const emailRedirectTo = `https://ojiugo.club/auth/callback?to=${encodeURIComponent(back)}`;
+          const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name }, emailRedirectTo } });
+          if (error) return { error: friendly(error.message) };
+          // with "Confirm email" switched on in Supabase there's no session until the link is clicked
+          if (!data.session) return { error: 'we’ve sent you an email — tap the link in it, then open your diary' };
+          return {};
         }
         const list = await demoAccounts();
         if (list.some((a) => a.email === email.toLowerCase())) return { error: friendly('already registered') };
@@ -146,6 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async deleteAccount() {
         if (supabase) {
           // Needs the `delete_my_account` database function — see README.
+          await removeAllPhotos().catch(() => {});
           const { error } = await supabase.rpc('delete_my_account');
           if (error) return { error: friendly(error.message) };
           await supabase.auth.signOut(); setUser(null); return {};

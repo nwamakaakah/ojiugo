@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { Image, ScrollView, StyleSheet, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import { router, useLocalSearchParams } from 'expo-router';
 import { BackLink, T } from '../components/ui';
+import { Icon } from '../components/Icon';
 import { BirdThumb } from '../components/BirdThumb';
 import { collection, shortDate, updateEntry, useEntries } from '../lib/entries';
 import { nameMystery } from '../lib/naming';
@@ -23,7 +25,6 @@ export default function Bird() {
   const photos = (s?.entries ?? []).map((e) => e.photo).filter(Boolean) as string[];
   const [slide, setSlide] = useState(0);
   const slideW = width - space.lg * 2;
-  const play = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${colors.textOnPrimary}" stroke-width="1.4" stroke-linejoin="round"><path d="M8.5 6.2c4 1.8 7.4 3.9 9.6 5.8-2.6 2-6 4-9.8 5.9-.3-4-.2-7.9.2-11.7Z"/></svg>`;
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => setSlide(Math.round(e.nativeEvent.contentOffset.x / slideW));
 
   return (
@@ -56,7 +57,7 @@ export default function Bird() {
             <T v="overline" color={colors.textLight}>songs & calls</T>
             {info.recordings.map((r, i) => (
               <View key={i} style={[styles.rec, { backgroundColor: colors.surfacePage }]}>
-                <View style={[styles.play, { backgroundColor: colors.actionPrimary }]}><SvgXml xml={play} width={22} height={22} /></View>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.actionPrimary, alignItems: 'center', justifyContent: 'center', paddingLeft: 3 }}><Icon name="play" color={colors.textOnPrimary} size={17} /></View>
                 <View style={{ flex: 1 }}><T v="label">{r.kind}</T><T v="bodySm" color={colors.textLight}>{r.place}</T></View>
                 <T v="caption" color={colors.textLight}>{r.length}</T>
               </View>

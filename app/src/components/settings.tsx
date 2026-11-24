@@ -1,13 +1,15 @@
 import { Children, Fragment, type ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Press as Pressable } from './Press';
 import { Toggle } from './form';
 import { SvgXml } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space } from '../theme/tokens';
 import { T } from './ui';
+import { Icon } from './Icon';
 
 export function Chevron({ color }: { color: string }) {
-  return <SvgXml xml={`<svg viewBox="0 0 8 12" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1.5 6.5 6 2 10.5"/></svg>`} width={7} height={11} />;
+  return <Icon name="chevron" color={color} size={8} rotate={-90} />;
 }
 
 /** Overline + rounded card holding rows separated by hairlines. */
@@ -63,7 +65,8 @@ export function Option({ title, note, selected, onPress }: { title: string; note
   return (
     <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress}
       style={[styles.option, { borderColor: selected ? colors.borderDefault : colors.borderSubtle, backgroundColor: colors.surfacePage }]}>
-      <View style={[styles.radio, { borderColor: colors.iconDefault }]}>
+      <View style={styles.radio}>
+        <View style={StyleSheet.absoluteFill}><Icon name="circle" color={colors.iconDefault} size={22} /></View>
         {selected ? <View style={[styles.dot, { backgroundColor: colors.actionPrimary }]} /> : null}
       </View>
       <T v="label" style={{ flex: 1 }}>{title}</T>
@@ -77,6 +80,6 @@ const styles = StyleSheet.create({
   rule: { height: StyleSheet.hairlineWidth },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.md, minHeight: 48 },
   option: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, height: 52, borderRadius: radius.md, borderWidth: 1 },
-  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.4, alignItems: 'center', justifyContent: 'center' },
+  radio: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 13, height: 13, borderRadius: 7 },
 });

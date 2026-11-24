@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+// Landing spot for the "confirm your email" link. It hands the birder straight back to the ọjịugo app,
+// passing along the sign-in details the link carries. If the app doesn't open, they can tap the button.
+---
+<Base title="opening your diary" header="none" footer="mini">
+  <section class="section done">
+    <img class="nest" src="/illustrations/nest.svg" alt="" width="285" height="160" />
+    <div class="text">
+      <h1 id="title">your email is confirmed</h1>
+      <p class="t-body-md" id="note">taking you back to your diary…</p>
+    </div>
+    <a class="btn t-button" id="open" href="ojiugo://auth-callback">open ọjịugo</a>
+  </section>
+</Base>
+
+<script>
+  // only ever hand off to the app itself (its own scheme, or Expo Go while testing)
+  const to = new URLSearchParams(location.search).get('to') || 'ojiugo://auth-callback';
+  const safe = /^(ojiugo|exp|exps):\/\//.test(to) ? to : 'ojiugo://auth-callback';
+  const err = new URLSearchParams(location.hash.slice(1)).get('error_description');
+  const target = safe + location.hash;
+  const btn = document.getElementById('open') as HTMLAnchorElement;
+  btn.href = target;
+  if (err) {
+    document.getElementById('title')!.textContent = 'that link has flown off';
+    document.getElementById('note')!.textContent = 'it may have expired — open the app and sign in with your email and password';
+  } else {
+    location.href = target;
+    setTimeout(() => { document.getElementById('note')!.textContent = 'tap below if your diary didn’t open on its own'; }, 1500);
+  }
+</script>
+
+<style>
+  .done { min-height: calc(100vh - 104px); padding-top: 160px; padding-bottom: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; text-align: center; }
+  .nest { width: 285px; height: auto; }
+  .text { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  h1 { font-weight: 600; font-size: 32px; line-height: 36px; }
+  .text p { max-width: 300px; }
+  .btn { width: 100%; max-width: 526px; }
+  @media (max-width: 1024px) { .done { padding-top: 100px; } }
+</style>

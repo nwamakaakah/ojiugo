@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Linking, ScrollView, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { BackLink, T } from '../components/ui';
 import { Group, Row, ToggleRow } from '../components/settings';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/Confirm';
 import { useAuth } from '../lib/auth';
 import { countryByName, SEASON_NAME } from '../lib/countries';
 import { storage } from '../lib/storage';
@@ -18,6 +20,7 @@ export default function Settings() {
   const { colors, lightMode } = useTheme();
   const { user, signOut, deleteAccount } = useAuth();
   const toast = useToast();
+  const confirm = useConfirm();
   const [notify, setNotify] = useState(true);
   useEffect(() => { storage.get('ojiugo.notifications', true).then(setNotify); }, []);
 
@@ -27,13 +30,12 @@ export default function Settings() {
 
   const toggleNotify = (v: boolean) => {
     setNotify(v); storage.set('ojiugo.notifications', v);
-    toast({ text: v ? 'notifications turned on' : 'notifications turned off', kind: 'bell' });
+    toast({ text: v ? 'notifications turned on' : 'notifications turned off', kind: 'bell', tone: v ? 'on' : 'off' });
   };
-  const confirmDelete = () => {
-    const go = async () => { const r = await deleteAccount(); if (!r.error) router.replace('/welcome'); else toast({ text: r.error }); };
-    const msg = 'this tears out every page for good — your entries can’t be brought back.';
-    if (Platform.OS === 'web') { if (globalThis.confirm?.(`delete your diary?\n\n${msg}`)) go(); return; }
-    Alert.alert('delete your diary?', msg, [{ text: 'keep it', style: 'cancel' }, { text: 'delete', style: 'destructive', onPress: go }]);
+  const confirmDelete = async () => {
+    const ok = await confirm({ title: 'delete your diary?', body: 'this tears out every page for good — your entries can’t be brought back.', cancel: 'keep it', confirm: 'delete my diary', tone: 'critical' });
+    if (!ok) return;
+    const r = await deleteAccount(); if (!r.error) router.replace('/welcome'); else toast({ text: r.error });
   };
 
   return (

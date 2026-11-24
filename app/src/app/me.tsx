@@ -1,7 +1,9 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ArrowIcon, T } from '../components/ui';
+import { Pop, Rise } from '../components/motion';
 import { TabBar } from '../components/TabBar';
 import { Stamp } from '../components/Stamp';
 import { useAuth } from '../lib/auth';
@@ -27,7 +29,7 @@ export default function Profile() {
         </Pressable>
 
         <View style={{ alignItems: 'center', gap: space.xs }}>
-          <T v="displayLg" style={{ fontSize: 26, lineHeight: 30 }}>{user?.name?.toLowerCase() || 'birder'}</T>
+          <T v="displayLg" style={{ textAlign: 'center', fontSize: 26, lineHeight: 30 }}>{user?.name?.toLowerCase() || 'birder'}</T>
           <T v="bodyMd" color={colors.textSubtle}>
             {isNew ? 'brand new diary' : `keeping this diary since ${user?.createdAt ? monthYear(user.createdAt) : 'today'}`}
           </T>
@@ -38,20 +40,21 @@ export default function Profile() {
         </View>
 
         <View style={{ flexDirection: 'row', gap: space.sm }}>
-          {[[stats.species, 'species met'], [stats.sightings, 'sightings'], [stats.thisWeek, 'this week']].map(([n, l]) => (
-            <View key={l} style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
+          {[[stats.species, 'species met'], [stats.sightings, 'sightings'], [stats.thisWeek, 'this week']].map(([n, l], i) => (
+            <Pop key={l} delay={120 + i * 70} style={{ flex: 1 }}><View style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
               <T v="title" style={{ fontSize: 30, lineHeight: 36 }}>{String(n)}</T>
               <T v="caption" color={colors.textSubtle} style={{ textTransform: 'uppercase', letterSpacing: 0.6 }}>{l}</T>
-            </View>
+            </View></Pop>
           ))}
         </View>
 
         <View style={{ gap: space.sm }}>
           <T v="overline" color={colors.textLight}>little milestones</T>
-          {MILESTONES.map((m) => {
+          {MILESTONES.map((m, i) => {
             const got = stats.earned[m.id];
             return (
-              <Pressable key={m.id} disabled={!got} onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
+              <Rise key={m.id} i={i} delay={250}>
+              <Pressable disabled={!got} onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
                 style={[styles.milestone, { backgroundColor: colors.surfacePage }]} accessibilityLabel={`${m.title}, ${got ? 'earned' : 'yet to come'}`}>
                 {got ? <Stamp color={m.colorKey} size={32} /> : <View style={[styles.empty, { borderColor: colors.borderDefault }]} />}
                 <View style={{ flex: 1, gap: 2 }}>
@@ -61,6 +64,7 @@ export default function Profile() {
                   </T>
                 </View>
               </Pressable>
+              </Rise>
             );
           })}
         </View>

@@ -1,8 +1,10 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import { router } from 'expo-router';
 import { ArrowIcon, T } from '../components/ui';
+import { Rise } from '../components/motion';
 import { TabBar } from '../components/TabBar';
 import { BirdThumb } from '../components/BirdThumb';
 import { Stamp } from '../components/Stamp';
@@ -36,8 +38,8 @@ export default function Calls() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: space['2xl'], gap: space.md }}>
-          {suggestions.map((e) => (
-            <View key={e.id} style={[styles.card, styles.big, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
+          {suggestions.map((e, i) => (
+            <Rise key={e.id} i={i}><View style={[styles.card, styles.big, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
               <T v="caption" color={colors.textLight}>a name, maybe?</T>
               <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
                 <BirdThumb uri={e.photo} size={50} r={radius.sm} />
@@ -50,11 +52,11 @@ export default function Calls() {
                 style={({ pressed }) => [styles.cta, { backgroundColor: pressed ? colors.actionPrimaryPressed : colors.actionPrimary }]}>
                 <T v="button" color={colors.textOnPrimary}>view the bird’s info</T>
               </Pressable>
-            </View>
+            </View></Rise>
           ))}
 
           {mysteries.length > 0 ? (
-            <Pressable accessibilityRole="button" onPress={() => router.push('/name')}
+            <Rise i={suggestions.length}><Pressable accessibilityRole="button" onPress={() => router.push('/name')}
               style={[styles.card, styles.row, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
               <SvgXml xml={notebook} width={24} height={24} />
               <View style={{ flex: 1, gap: 2 }}>
@@ -62,18 +64,18 @@ export default function Calls() {
                 <T v="caption" color={colors.textLight}>name them anytime</T>
               </View>
               <ArrowIcon color={colors.iconDefault} />
-            </Pressable>
+            </Pressable></Rise>
           ) : null}
 
-          {milestones.map((m) => (
-            <Pressable key={m.id} accessibilityRole="button" onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
+          {milestones.map((m, i) => (
+            <Rise key={m.id} i={suggestions.length + 1 + i}><Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
               style={[styles.card, styles.row, { backgroundColor: colors.surfacePage }]}>
               <Stamp color={m.colorKey} size={36} />
               <View style={{ flex: 1, gap: 2 }}>
                 <T v="ui" color={colors.textDefault}>milestone — {m.title}</T>
                 <T v="caption" color={colors.textLight}>{m.id === 'first-bird' ? 'you’ve started your diary. welcome.' : m.earned.replace('{species}', earned[m.id]?.species ?? 'bird')}</T>
               </View>
-            </Pressable>
+            </Pressable></Rise>
           ))}
         </ScrollView>
       )}

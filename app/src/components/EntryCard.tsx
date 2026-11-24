@@ -1,7 +1,9 @@
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { Press as Pressable } from './Press';
 import { SvgXml } from 'react-native-svg';
 import { router } from 'expo-router';
 import { T } from './ui';
+import { Rise } from './motion';
 import { shortDate, type Entry } from '../lib/entries';
 import { primitives, radius, sand, space } from '../theme/tokens';
 
@@ -16,21 +18,23 @@ const grass = `<svg viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg" fil
 export function EntryCard({ entry, index, wide }: { entry: Entry; index: number; wide?: boolean }) {
   const tone = primitives[TONES[index % TONES.length]];
   return (
+    <Rise i={index} style={[{ flex: 1 }, !wide && { maxWidth: '48.5%' }]}>
     <Pressable accessibilityRole="button" accessibilityLabel={`${entry.species ?? 'mystery bird'}, ${shortDate(entry.createdAt)}`}
       onPress={() => router.push({ pathname: '/entry', params: { id: entry.id } })}
-      style={[styles.card, { height: 200, backgroundColor: tone['600'] }, !wide && { maxWidth: '48.5%' }]}>
+      style={[styles.card, { width: '100%', height: 200, backgroundColor: tone['600'] }]}>
       {entry.photo ? <Image source={{ uri: entry.photo }} style={StyleSheet.absoluteFill} resizeMode="cover" />
         : <View style={styles.art}><SvgXml xml={grass} width="100%" height="100%" preserveAspectRatio="xMidYMax slice" /></View>}
       <View style={[styles.band, { backgroundColor: `${tone['700']}cc` }]}>
-        <T v="label" color={sand['25']} numberOfLines={1}>{entry.species ?? 'Mystery bird'}</T>
-        <T v="caption" color={sand['100']} numberOfLines={1}>{[shortDate(entry.createdAt), entry.place].filter(Boolean).join('  •  ')}</T>
+        <T v="label" color={sand['25']} numberOfLines={2}>{entry.species ?? 'Mystery bird'}</T>
+        <T v="caption" color={sand['100']} numberOfLines={2}>{[shortDate(entry.createdAt), entry.place].filter(Boolean).join('  •  ')}</T>
       </View>
     </Pressable>
+    </Rise>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, borderRadius: radius.lg, overflow: 'hidden', justifyContent: 'flex-end' },
+  card: { borderRadius: radius.lg, overflow: 'hidden', justifyContent: 'flex-end' },
   art: { position: 'absolute', left: 0, right: 0, bottom: 0, top: 10 },
   band: { padding: space.md, gap: 2 },
 });

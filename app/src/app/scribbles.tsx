@@ -1,7 +1,9 @@
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { ArrowIcon, BackLink, T } from '../components/ui';
+import { Rise } from '../components/motion';
 import { shortDate, useEntries } from '../lib/entries';
 import { useTheme } from '../theme/ThemeProvider';
 import { primitives, radius, space } from '../theme/tokens';
@@ -27,6 +29,7 @@ export default function Scribbles() {
         }
         ListEmptyComponent={<T v="bodyMd" color={colors.textSubtle}>nothing waiting — every scribble has its full page</T>}
         renderItem={({ item, index }) => (
+          <Rise i={index}>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/write', params: { id: item.id } })}
             style={{ backgroundColor: colors.surfacePage, borderRadius: radius.xl, padding: space.lg, gap: space.md, shadowColor: colors.shadow, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}>
             <View style={{ position: 'absolute', top: -7, width: 64, height: 22, backgroundColor: TAPE[index % TAPE.length], opacity: 0.8, ...(index % 2 ? { right: 60 } : { left: 44 }) }} />
@@ -36,6 +39,7 @@ export default function Scribbles() {
               <T v="ui" color={colors.textSubtle}>finish this page</T><ArrowIcon color={colors.iconSubtle} />
             </View>
           </Pressable>
+          </Rise>
         )}
       />
     </SafeAreaView>

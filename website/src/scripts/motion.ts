@@ -95,10 +95,10 @@ if (reduce) {
   // text drifts a little slower than the page. Foliage and illustrations stay fixed to their backgrounds.
   // App previews stay still (they only tilt on hover — see motion.css).
   const drift = (els: HTMLElement[], from: number, to: number) => els.forEach((el) =>
-    gsap.fromTo(el, { y: from }, { y: to, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 } }));
+    gsap.fromTo(el, { y: from }, { y: to, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } }));
   const later = (sel: string) => $(`main section:not(:first-of-type) :is(${sel})`);
-  drift(later('h2, .t-overline').filter((el) => !el.closest('.card, .soon')), 40, -40);
-  drift(later('.t-body-lg, .t-body-md').filter((el) => !el.closest('.card, .soon, .row, .top')), 25, -25);
+  drift(later('h2, .t-overline').filter((el) => !el.closest('.card, .soon')), 12, -12);
+  drift(later('.t-body-lg, .t-body-md').filter((el) => !el.closest('.card, .soon, .row, .top')), 8, -8);
 
   /* ---------- buttons burst into feathers (and chirp) when pressed ---------- */
   const FEATHER = '<svg viewBox="0 0 24 24"><path class="vane" d="M19 3C11 4 6 9 5 17l2 1c6-1 11-6 12-15Z"/><path class="rachis" d="M4 21 16 7"/></svg>';

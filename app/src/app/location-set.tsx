@@ -16,7 +16,7 @@ export default function LocationSet() {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg }}>
         <Sparkles width={190} />
         <View style={{ alignItems: 'center', gap: space.xs, paddingHorizontal: space.xl }}>
-          <T v="displayLg" style={{ fontSize: 26, lineHeight: 30 }}>your location has changed</T>
+          <T v="displayLg" style={{ textAlign: 'center', fontSize: 26, lineHeight: 30 }}>your location has changed</T>
           <T v="bodySm" color={colors.textSubtle} style={{ textAlign: 'center' }}>
             you’re birding in {country} now — so your seasons are {c ? seasonsSentence(c) : 'set'}
           </T>

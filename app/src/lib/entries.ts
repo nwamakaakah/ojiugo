@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { storage } from './storage';
+import { onEntriesChange, readRows, removeRow, saveRow, type Row } from './sync';
 import type { Season } from '../theme/tokens';
 
 export const FEELINGS = ['joyful', 'awe', 'calm', 'wonder', 'proud'] as const;
@@ -36,22 +36,20 @@ export type Entry = {
   rejected?: string[];    // suggestions the birder said "not my bird" to
 };
 
-const KEY = 'ojiugo.entries';
-export const loadEntries = async () => (await storage.get<Partial<Entry>[]>(KEY, [])).map((e) => ({ kind: 'entry', ...e }) as Entry);
-const saveAll = (list: Entry[]) => storage.set(KEY, list);
+// Pages live on the phone first and sync to Supabase in the background (see ./sync).
+export const loadEntries = async () => (await readRows()).map((e) => ({ kind: 'entry', ...e }) as Entry);
 
 export async function addEntry(e: Omit<Entry, 'id'>) {
-  const list = await loadEntries();
-  const entry = { ...e, id: `${Date.now()}` } as Entry;
-  await saveAll([...list, entry]);
+  const entry = { ...e, id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}` } as Entry;
+  await saveRow(entry as unknown as Row);
   return entry;
 }
 export async function updateEntry(id: string, patch: Partial<Entry>) {
-  const list = await loadEntries();
-  await saveAll(list.map((e) => (e.id === id ? { ...e, ...patch } : e)));
+  const cur = (await loadEntries()).find((e) => e.id === id);
+  if (cur) await saveRow({ ...cur, ...patch } as unknown as Row);
 }
 export async function deleteEntry(id: string) {
-  await saveAll((await loadEntries()).filter((e) => e.id !== id));
+  await removeRow(id);
 }
 export const getEntry = async (id: string) => (await loadEntries()).find((e) => e.id === id);
 
@@ -97,6 +95,8 @@ export function newMilestones(before: Entry[], after: Entry[]): MilestoneId[] {
 export function useEntries() {
   const [entries, setEntries] = useState<Entry[] | null>(null);
   useFocusEffect(useCallback(() => { loadEntries().then(setEntries); }, []));
+  // redraw live when a page changes here or arrives from another phone
+  useEffect(() => onEntriesChange(() => { loadEntries().then(setEntries); }), []);
   return entries;
 }
 export function useStats() {
@@ -106,6 +106,7 @@ export function useStats() {
 export function useEntry(id?: string) {
   const [entry, setEntry] = useState<Entry | null | undefined>(undefined);
   useFocusEffect(useCallback(() => { if (id) getEntry(id).then((e) => setEntry(e ?? null)); }, [id]));
+  useEffect(() => (id ? onEntriesChange(() => { getEntry(id).then((e) => setEntry(e ?? null)); }) : undefined), [id]);
   useEffect(() => { if (!id) setEntry(null); }, [id]);
   return entry;
 }

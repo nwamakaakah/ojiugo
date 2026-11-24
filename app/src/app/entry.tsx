@@ -1,14 +1,17 @@
 import { useRef, useState, type ComponentRef } from 'react';
-import { Alert, Image, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Image, Modal, Platform, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { captureRef } from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
 import { BackLink, T } from '../components/ui';
+import { Rise } from '../components/motion';
 import { BirdThumb } from '../components/BirdThumb';
 import { BirdieCard } from '../components/BirdieCard';
 import { FeelingChip, Stamp } from '../components/form';
 import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/Confirm';
 import { BREEDING, deleteEntry, stampTime, useEntry } from '../lib/entries';
 import { speciesInfo } from '../lib/species';
 import { SEASON_NAME } from '../lib/countries';
@@ -19,6 +22,8 @@ import { radius, space } from '../theme/tokens';
 export default function EntryDetail() {
   const { colors } = useTheme();
   const toast = useToast();
+  const { width: winW } = useWindowDimensions();
+  const confirm = useConfirm();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const e = useEntry(id);
   const [sharing, setSharing] = useState(false);
@@ -30,11 +35,9 @@ export default function EntryDetail() {
   const sections = [['my description', e.describe ?? e.note], ['my feelings', e.more]].filter(([, v]) => v) as [string, string][];
   const sing = BREEDING.find(([c]) => c === e.breeding?.[0]);
 
-  const tear = () => {
-    const go = async () => { await deleteEntry(e.id); router.replace('/torn'); };
-    const msg = 'this page will be crumpled up for good — it can’t be smoothed out again.';
-    if (Platform.OS === 'web') { if (globalThis.confirm?.(`tear out this page?\n\n${msg}`)) go(); return; }
-    Alert.alert('tear out this page?', msg, [{ text: 'keep it', style: 'cancel' }, { text: 'tear it out', style: 'destructive', onPress: go }]);
+  const tear = async () => {
+    const ok = await confirm({ title: 'tear out this page?', body: 'this page will be crumpled up for good — it can’t be smoothed out again.', cancel: 'keep it', confirm: 'tear it out', tone: 'critical' });
+    if (ok) { await deleteEntry(e.id); router.replace('/torn'); }
   };
   const download = async () => {
     try {
@@ -51,6 +54,7 @@ export default function EntryDetail() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgApp }} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={{ padding: space.lg, paddingBottom: space['3xl'] }}>
         <BackLink />
+        <Rise delay={60}>
         <View style={[styles.page, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
           <View style={[styles.tape, { backgroundColor: colors.softNeutralFill }]} />
           {e.photo ? <Image source={{ uri: e.photo }} style={styles.photo} /> : <View style={[styles.photo, { backgroundColor: colors.softNeutralFill, alignItems: 'center', justifyContent: 'center' }]}>{named ? <BirdThumb size={80} /> : null}</View>}
@@ -95,22 +99,24 @@ export default function EntryDetail() {
             <T v="button" color={colors.softInteractiveLabel}>{named ? 'learn about your bird' : 'identify your bird'}</T>
           </Pressable>
         </View>
+        </Rise>
       </ScrollView>
 
+      {/* Entry / Detail - Identified Bird - Share Page (Figma 2012:10936) */}
       <Modal visible={sharing} transparent animationType="slide" onRequestClose={() => setSharing(false)}>
         <View style={{ flex: 1, backgroundColor: colors.overlayScrim, justifyContent: 'flex-end' }}>
-          <SafeAreaView edges={['bottom']} style={{ backgroundColor: colors.surfacePage, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}>
-            <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.lg }}>
-              <T v="displayLg" style={{ fontSize: 24, lineHeight: 28 }}>share your birdie card with others</T>
-              <View style={{ backgroundColor: colors.bgApp, padding: space.md, borderRadius: radius.md }}>
-                <View ref={cardRef} collapsable={false}><BirdieCard entry={e} /></View>
-              </View>
-              <View style={{ flexDirection: 'row', gap: space.md }}>
-                <Pressable accessibilityRole="button" onPress={() => setSharing(false)} style={[styles.sheetBtn, { borderWidth: 1, borderColor: colors.borderDefault }]}><T v="button">close</T></Pressable>
-                <Pressable accessibilityRole="button" onPress={download} style={[styles.sheetBtn, { backgroundColor: colors.actionPrimary }]}><T v="button" color={colors.textOnPrimary}>download card</T></Pressable>
-              </View>
+          <View style={{ backgroundColor: colors.surfacePage, borderTopLeftRadius: 28, borderTopRightRadius: 28, overflow: 'hidden', maxHeight: '96%' }}>
+            <View style={{ paddingHorizontal: space.lg, paddingTop: 28, paddingBottom: 18, borderBottomWidth: 1, borderColor: colors.borderSubtle }}>
+              <T v="displayLg" style={{ fontSize: 25, lineHeight: 30 }}>share your birdie card with others</T>
+            </View>
+            <ScrollView bounces={false}>
+              <View ref={cardRef} collapsable={false}><BirdieCard entry={e} width={winW} /></View>
             </ScrollView>
-          </SafeAreaView>
+            <SafeAreaView edges={['bottom']} style={{ flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.md }}>
+              <Pressable accessibilityRole="button" onPress={() => setSharing(false)} style={[styles.sheetBtn, { borderWidth: 1, borderColor: colors.borderDefault }]}><T v="button">close</T></Pressable>
+              <Pressable haptic accessibilityRole="button" onPress={download} style={[styles.sheetBtn, { backgroundColor: colors.actionPrimary }]}><T v="button" color={colors.textOnPrimary}>download card</T></Pressable>
+            </SafeAreaView>
+          </View>
         </View>
       </Modal>
     </SafeAreaView>

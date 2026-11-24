@@ -1,5 +1,6 @@
 import { useRef, type ComponentRef } from 'react';
-import { Pressable, StyleSheet, TextInput, View, type TextStyle } from 'react-native';
+import { StyleSheet, TextInput, View, type TextStyle } from 'react-native';
+import { Press as Pressable } from './Press';
 import { useTheme } from '../theme/ThemeProvider';
 import { space, type } from '../theme/tokens';
 import { T } from './ui';
@@ -21,7 +22,7 @@ export function CodeInput({ value, onChange, length = 6 }: { value: string; onCh
           );
         })}
       </View>
-      <TextInput
+      <TextInput maxFontSizeMultiplier={1.2}
         ref={ref} value={value} autoFocus maxLength={length}
         onChangeText={(t) => onChange(t.replace(/\D/g, '').slice(0, length))}
         keyboardType="number-pad" textContentType="oneTimeCode" autoComplete="one-time-code"

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Image, Pressable, ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import * as ImagePicker from 'expo-image-picker';
 import { BackLink, Button, T } from '../components/ui';
+import { Icon } from '../components/Icon';
 import { Choice, Feather, FeelingChip, Line, SearchGlyph, SectionLabel } from '../components/form';
 import { useToast } from '../components/Toast';
 import { BREEDING, COUNTS, FEELINGS, SIZES, addEntry, getEntry, loadEntries, newMilestones, parseStamp, updateEntry, type Entry, type Feeling } from '../lib/entries';
@@ -74,7 +76,6 @@ export default function Write() {
     else router.replace(next as never);
   };
 
-  const camera = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${colors.iconDefault}" stroke-width="1.3" stroke-linejoin="round"><path d="M4.5 8.2c0-1 .7-1.7 1.6-1.7h2.2l1.3-2h4.8l1.3 2h2.2c.9 0 1.6.7 1.6 1.7v9.1c0 .9-.7 1.6-1.6 1.6H6.1c-.9 0-1.6-.7-1.6-1.6Z"/><path d="M12 9.8c1.7 0 3 1.2 3 2.9s-1.3 2.9-3 2.9-2.9-1.3-2.9-2.9 1.3-2.9 2.9-2.9Z"/></svg>`;
   const group = { gap: space.sm };
   const wrap = { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: space.sm };
 
@@ -92,7 +93,7 @@ export default function Write() {
           <View style={{ position: 'absolute', top: -8, width: 64, height: 22, backgroundColor: colors.softNeutralFill, opacity: 0.9 }} />
           {photo ? <Image source={{ uri: photo }} style={{ width: '100%', height: 220, borderRadius: radius.xl }} /> : (
             <View style={{ alignItems: 'center', gap: space.sm, padding: space.lg }}>
-              <SvgXml xml={camera} width={32} height={32} />
+              <Icon name="camera" color={colors.iconDefault} size={30} />
               <T v="label">tap to upload photo</T>
               <T v="caption" color={colors.textSubtle}>no good shot? you can describe instead</T>
             </View>

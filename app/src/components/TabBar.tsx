@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import { Press as Pressable } from './Press';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, SvgXml } from 'react-native-svg';
 import { router } from 'expo-router';
 import { useTheme } from '../theme/ThemeProvider';
 import { T } from './ui';
+import { Icon } from './Icon';
+import Animated, { ZoomIn, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 // "Bottom Navigation" component from Figma.
 // Colours: bar = nav/glass-fill, + button = action/primary with a surface/page ring,
@@ -28,16 +31,19 @@ export function TabBar({ active }: { active: Key }) {
   const cx = w * X.fab;
   const l = cx - NOTCH_HALF, r = cx + NOTCH_HALF;
   const d = `M0 0 H${l} C${l + 24} 0 ${cx - 40} ${NOTCH_DEPTH} ${cx} ${NOTCH_DEPTH} C${cx + 40} ${NOTCH_DEPTH} ${r - 24} 0 ${r} 0 H${w} V${h} H0 Z`;
-  const plus = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${colors.textOnPrimary}" stroke-width="2.4" stroke-linecap="round"><path d="M12.2 4.6c-.2 4.9-.1 9.8.1 14.7"/><path d="M4.8 12.4c4.8-.3 9.6-.2 14.4.1"/></svg>`;
+
+  const spin = useSharedValue(0);
+  const plusStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value}deg` }] }));
+  const add = () => { spin.value = withSequence(withTiming(90, { duration: 160 }), withSpring(0, { damping: 8 })); router.push('/scribble'); };
 
   const tab = (k: Key) => {
     const on = active === k;
     return (
-      <Pressable key={k} accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={k} hitSlop={8}
+      <Pressable key={k} haptic sink={0.9} accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={k} hitSlop={8}
         onPress={() => !on && router.replace(ROUTES[k])}
         style={[styles.tab, { left: w * X[k] - 40, top: on ? 16 : 20 }]}>
         <T v="bodyLg" color={on ? colors.textDefault : colors.textLight}>{k}</T>
-        {on ? <View style={[styles.mark, { backgroundColor: colors.actionPrimary }]} /> : null}
+        {on ? <Animated.View entering={ZoomIn.springify().damping(10).stiffness(220)} style={[styles.mark, { backgroundColor: colors.actionPrimary }]} /> : null}
       </Pressable>
     );
   };
@@ -48,9 +54,9 @@ export function TabBar({ active }: { active: Key }) {
         <Path d={d} fill={colors.navGlassFill} />
       </Svg>
       {tab('entries')}{tab('flocks')}{tab('calls')}{tab('me')}
-      <Pressable accessibilityRole="button" accessibilityLabel="add an entry" onPress={() => router.push('/scribble')}
+      <Pressable haptic sink={0.88} accessibilityRole="button" accessibilityLabel="add an entry" onPress={add}
         style={({ pressed }) => [styles.fab, { left: cx - FAB / 2, top: FAB_TOP, borderColor: colors.surfacePage, backgroundColor: pressed ? colors.actionPrimaryPressed : colors.actionPrimary, shadowColor: colors.shadow }]}>
-        <SvgXml xml={plus} width={26} height={26} />
+        <Animated.View style={plusStyle}><Icon name="plus" color={colors.textOnPrimary} size={26} /></Animated.View>
       </Pressable>
     </View>
   );

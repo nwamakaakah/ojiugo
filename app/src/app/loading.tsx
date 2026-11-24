@@ -14,7 +14,7 @@ export default function Loading() {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg }}>
         <Leaves size={150} />
         <View style={{ alignItems: 'center', gap: space.xs }}>
-          <T v="displayLg" style={{ fontSize: 26, lineHeight: 30 }}>ọjịugo</T>
+          <T v="displayLg" style={{ textAlign: 'center', fontSize: 26, lineHeight: 30 }}>ọjịugo</T>
           <T v="bodyMd" color={colors.textSubtle}>warming up the nest…</T>
         </View>
       </View>

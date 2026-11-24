@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, TextInput, View, type TextStyle } from 'react-native';
+import { FlatList, TextInput, View, type TextStyle } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { router, useLocalSearchParams } from 'expo-router';
 import { BackLink, Heading, Screen, T } from '../components/ui';
 import { COUNTRIES, SEASON_ABBR, currentSeasonFor, type Country } from '../lib/countries';
@@ -35,7 +36,7 @@ export default function CountryPicker() {
           <T v="bodySm" color={colors.textOnPrimary}>{current.seasons.map((s) => SEASON_ABBR[s]).join(', ')}</T>
         </View>
       ) : null}
-      <TextInput
+      <TextInput maxFontSizeMultiplier={1.2}
         value={q} onChangeText={setQ} placeholder="type your country…" placeholderTextColor={colors.textDisabled}
         style={[type.bodyMd as TextStyle, { color: colors.textDefault, borderBottomWidth: 1, borderBottomColor: colors.borderDefault, paddingVertical: space.sm, marginTop: space.xl, marginBottom: space.lg, outlineWidth: 0 } as TextStyle]}
       />

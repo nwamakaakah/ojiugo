@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { router } from 'expo-router';
 import { BackLink, Button, Divider, Field, Heading, Notice, Screen, SocialRow, T } from '../components/ui';
 import { useAuth } from '../lib/auth';

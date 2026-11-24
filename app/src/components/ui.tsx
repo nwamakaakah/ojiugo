@@ -1,11 +1,31 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type TextStyle, type ViewStyle, KeyboardAvoidingView, Platform } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type TextStyle, type ViewStyle, KeyboardAvoidingView, Platform } from 'react-native';
+import { Press as Pressable } from './Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 import { router } from 'expo-router';
 import { useTheme } from '../theme/ThemeProvider';
 import { fonts, radius, space, type } from '../theme/tokens';
 import { arrowSvg, backSvg } from './svgs';
+import { Icon } from './Icon';
+
+// Keeps text from being cut off on phones:
+// - Mali and Caveat are tall fonts; a line height tighter than the letters clips their tops and tails on Android,
+//   so every line gets at least ~1.25× its font size (Caveat 1.22×);
+// - centred text stretches to its row (see below);
+// - Android's extra font padding is switched off so text sits where the design puts it inside pills and buttons;
+// - very large system text sizes are capped at 1.2× so labels still fit their pills.
+export const MAX_SCALE = 1.2;
+export function roomy(s: TextStyle): TextStyle {
+  const fs = s.fontSize ?? 14;
+  const min = Math.ceil(fs * (s.fontFamily === fonts.display ? 1.22 : 1.25));
+  return {
+    includeFontPadding: false,
+    ...(s.lineHeight != null && s.lineHeight < min ? { lineHeight: min } : null),
+    // centred text fills its row, so iOS can't measure it a hair too narrow and hide the last word on a clipped second line
+    ...(s.textAlign === 'center' && s.alignSelf == null && s.position !== 'absolute' ? { alignSelf: 'stretch' as const } : null),
+  };
+}
 
 /** Arrow icons recoloured to the current theme. */
 export function ArrowIcon({ color, back = false }: { color: string; back?: boolean }) {
@@ -25,9 +45,10 @@ export function Screen({ children, scroll = false, style }: { children: ReactNod
   );
 }
 
-export function T({ v = 'bodyMd', color, style, children, ...rest }: { v?: keyof typeof type; color?: string; style?: TextStyle | TextStyle[]; children: ReactNode; numberOfLines?: number }) {
+export function T({ v = 'bodyMd', color, style, children, ...rest }: { v?: keyof typeof type; color?: string; style?: TextStyle | TextStyle[]; children: ReactNode; numberOfLines?: number; adjustsFontSizeToFit?: boolean; minimumFontScale?: number }) {
   const { colors } = useTheme();
-  return <Text {...rest} style={[type[v] as TextStyle, { color: color ?? colors.textDefault }, style as TextStyle]}>{children}</Text>;
+  const flat = (StyleSheet.flatten([type[v] as TextStyle, style as TextStyle]) ?? {}) as TextStyle;
+  return <Text maxFontSizeMultiplier={MAX_SCALE} {...rest} style={[type[v] as TextStyle, { color: color ?? colors.textDefault }, style as TextStyle, roomy(flat)]}>{children}</Text>;
 }
 
 export function BackLink({ label = 'back', onPress }: { label?: string; onPress?: () => void }) {
@@ -63,7 +84,7 @@ export function Button({ title, onPress, disabled, loading, variant = 'primary',
     );
   }
   return (
-    <Pressable
+    <Pressable haptic
       accessibilityRole="button" accessibilityState={{ disabled: !!off }} onPress={onPress} disabled={off}
       style={({ pressed }) => [styles.btn, { backgroundColor: off ? colors.actionPrimaryDisabled : pressed ? colors.actionPrimaryPressed : colors.actionPrimary }, style]}
     >
@@ -81,7 +102,7 @@ export function Field({ label, error, hint, secure, ...input }: TextInputProps &
     <View style={{ gap: space.sm }}>
       <T v="label" color={colors.textLight} style={{ textTransform: 'uppercase' }}>{label}</T>
       <View style={[styles.fieldRow, { borderBottomColor: error ? colors.textCritical : focused ? colors.actionPrimary : colors.borderDefault }]}>
-        <TextInput
+        <TextInput maxFontSizeMultiplier={1.2}
           {...input}
           secureTextEntry={secure ? hidden : false}
           placeholderTextColor={colors.textDisabled}
@@ -101,8 +122,7 @@ export function Field({ label, error, hint, secure, ...input }: TextInputProps &
 }
 
 function EyeToggle({ color, off }: { color: string; off: boolean }) {
-  const xml = `<svg width="22" height="18" viewBox="0 0 22 18" fill="none" stroke="${color}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 9.2C3.6 5.4 7 3.2 11 3.2s7.4 2.2 9.5 6c-2.1 3.6-5.5 5.7-9.5 5.7S3.6 12.8 1.5 9.2Z"/><path d="M11 6.4c1.7 0 2.9 1.2 2.9 2.8S12.7 12 11 12s-2.8-1.2-2.8-2.8S9.4 6.4 11 6.4Z"/>${off ? '<path d="M3 1.5c5.4 5 10.7 10.1 16 15.2"/>' : ''}</svg>`;
-  return <SvgXml xml={xml} width={22} height={18} />;
+  return off ? <Icon name="eyeSlash" color={color} size={22} /> : <Icon name="eye" color={color} size={18} />;
 }
 
 export function Divider({ label }: { label: string }) {

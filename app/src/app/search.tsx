@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, View } from 'react-native';
+import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { BackLink, T } from '../components/ui';
+import { Rise } from '../components/motion';
 import { BirdThumb } from '../components/BirdThumb';
 import { Choice, FeelingChip, Line, SearchGlyph, SectionLabel } from '../components/form';
 import { useAuth } from '../lib/auth';
@@ -63,7 +65,8 @@ export default function Search() {
           </View>
         }
         ListEmptyComponent={searching ? <T v="bodyMd" color={colors.textSubtle}>no memories match that yet</T> : undefined}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
+          <Rise i={index}>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/entry', params: { id: item.id } })}
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfacePage, shadowColor: colors.shadow, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}>
             <BirdThumb uri={item.photo} size={58} />
@@ -72,6 +75,7 @@ export default function Search() {
               <T v="bodySm" color={colors.textLight}>{[shortDate(item.createdAt), item.place].filter(Boolean).join(' • ')}</T>
             </View>
           </Pressable>
+          </Rise>
         )}
       />
     </SafeAreaView>
