@@ -27,6 +27,11 @@ main { animation: oj-fade-in 240ms ease-out both; }
 .card:hover { box-shadow: 0 16px 36px rgba(68, 73, 54, .18); }
 .card img { transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
 .card:hover img:not(.shot) { transform: scale(1.035); }
+/* phones and tablets have no hover: the same look plays when a card scrolls into the middle of the screen */
+@media (hover: none) {
+  .card.in-view { box-shadow: 0 16px 36px rgba(68, 73, 54, .18); }
+  .card.in-view img:not(.shot) { transform: scale(1.035); }
+}
 
 /* nav links: underline dot slides in */
 .links a::after { transition: transform .25s ease, opacity .25s ease; }
@@ -69,6 +74,9 @@ h1 .w, h2 .w { padding-bottom: .06em; }
 .hero-img, .stamps-img, .card .shot { transition: transform .5s cubic-bezier(.2, .7, .2, 1); transform-origin: 50% 60%; }
 @media (hover: hover) {
   .hero-img:hover, .stamps-img:hover, .card:hover .shot { transform: rotate(-2.5deg) translateY(-4px); }
+}
+@media (hover: none) {
+  .hero-img.in-view, .stamps-img.in-view, .card.in-view .shot { transform: rotate(-2.5deg) translateY(-4px); }
 }
 
 /* eye cursor (mouse only) */

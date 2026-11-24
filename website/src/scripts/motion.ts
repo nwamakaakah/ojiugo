@@ -132,6 +132,13 @@ if (reduce) {
   /* ---------- below the first screen: just parallax ---------- */
   // text drifts a little slower than the page. Foliage and illustrations stay fixed to their backgrounds.
   // App previews stay still (they only tilt on hover — see motion.css).
+  // On touch screens there's no hover, so cards and previews take their hover look while they sit in
+  // the middle band of the screen, and let it go as they scroll away.
+  if (matchMedia('(hover: none)').matches) {
+    const io = new IntersectionObserver((list) => list.forEach((e) => e.target.classList.toggle('in-view', e.isIntersecting)),
+      { rootMargin: '-30% 0px -30% 0px' });
+    document.querySelectorAll('.hero-img, .stamps-img, .card').forEach((el) => io.observe(el));
+  }
   const drift = (els: HTMLElement[], from: number, to: number) => els.forEach((el) =>
     gsap.fromTo(el, { y: from }, { y: to, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: true } }));
   const later = (sel: string) => $(`main section:not(:first-of-type) :is(${sel})`);
