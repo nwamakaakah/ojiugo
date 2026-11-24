@@ -1,0 +1,82 @@
+/* ọjịugo — motion layer: page transitions, scroll reveals and small hover/press touches.
+   Everything here switches off for people who ask their device for reduced motion. */
+
+/* page changes: a soft cross-fade with a slight rise (browsers that support cross-document view transitions) */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 260ms cubic-bezier(.4, 0, .2, 1) both oj-page-out; }
+::view-transition-new(root) { animation: 420ms cubic-bezier(.2, .7, .2, 1) 60ms both oj-page-in; }
+.site-header { view-transition-name: oj-header; }          /* header stays put while the page changes */
+::view-transition-group(oj-header) { animation-duration: 0s; }
+@keyframes oj-page-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes oj-page-in { from { opacity: 0; transform: translateY(14px); } }
+
+/* first paint of a page (also covers browsers without view transitions) */
+main { animation: oj-page-in 520ms cubic-bezier(.2, .7, .2, 1) both; }
+
+/* buttons: lift on hover, settle on press, arrow nudges forward */
+.btn, .get, .badge, .add, .tab { transition: background-color .2s ease, transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s ease, opacity .7s cubic-bezier(.2, .7, .2, 1); }
+.btn:hover, .get:hover, .badge:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(68, 73, 54, .16); }
+.btn:active, .get:active, .badge:active, .add:active { transform: translateY(0) scale(.97); box-shadow: none; transition-duration: .08s; }
+.btn .icon { transition: transform .3s cubic-bezier(.2, .7, .2, 1); }
+.btn:hover .icon { transform: translateX(4px); }
+
+/* cards: gentle lift, photo eases in */
+.card { transition: box-shadow .35s ease; will-change: transform; }
+.card:hover { box-shadow: 0 16px 36px rgba(68, 73, 54, .18); }
+.card img { transition: transform .8s cubic-bezier(.2, .7, .2, 1); }
+.card:hover img:not(.shot) { transform: scale(1.035); }
+
+/* nav links: underline dot slides in */
+.links a::after { transition: transform .25s ease, opacity .25s ease; }
+.links a:not([aria-current='page'])::after { content: ''; position: absolute; left: 50%; bottom: -8px; width: 5px; height: 5px; border-radius: 50%; background: var(--action-primary); transform: translate(-50%, 4px); opacity: 0; }
+.links a:hover::after { transform: translate(-50%, 0); opacity: .5; }
+
+/* header softens into a shadow once you've scrolled */
+.site-header .pill { transition: box-shadow .3s ease, background-color .3s ease; }
+.is-scrolled .site-header .pill { box-shadow: 0 4px 18px rgba(68, 73, 54, .12); }
+
+
+
+/* mobile menu slides down */
+.mobile-menu:not([hidden]) { animation: oj-menu .35s cubic-bezier(.2, .7, .2, 1) both; }
+.mobile-menu:not([hidden]) .menu-links > * { animation: oj-page-in .45s cubic-bezier(.2, .7, .2, 1) both; }
+.mobile-menu .menu-links > :nth-child(2) { animation-delay: 50ms; }
+.mobile-menu .menu-links > :nth-child(3) { animation-delay: 100ms; }
+.mobile-menu .menu-links > :nth-child(4) { animation-delay: 150ms; }
+@keyframes oj-menu { from { opacity: 0; transform: translateY(-12px); } }
+
+/* Lenis smooth scrolling */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* split text pieces */
+.w, .ch { display: inline-block; will-change: transform; }
+h1 .w, h2 .w { padding-bottom: .06em; }
+.birds { display: inline-block; cursor: pointer; }
+.gap { display: inline-block; width: .28em; }
+
+/* feathers that burst out of a pressed button */
+.oj-feather { position: fixed; z-index: 90; width: 22px; height: 22px; pointer-events: none; }
+.oj-feather svg { width: 100%; height: 100%; overflow: visible; }
+.oj-feather .vane { fill: var(--tone, #8a5a3c); opacity: .9; }
+.oj-feather .rachis { fill: none; stroke: #4a3a2a; stroke-width: 1.2; stroke-linecap: round; }
+
+/* app previews: no motion, just a slight tilt when you hover */
+.hero-img, .stamps-img, .card .shot { transition: transform .5s cubic-bezier(.2, .7, .2, 1); transform-origin: 50% 60%; }
+@media (hover: hover) {
+  .hero-img:hover, .stamps-img:hover, .card:hover .shot { transform: rotate(-2.5deg) translateY(-4px); }
+}
+
+/* eye cursor (mouse only) */
+.motion-on .oj-cursor { position: fixed; left: 0; top: 0; z-index: 80; width: 26px; height: 18px; margin: -9px 0 0 -13px; pointer-events: none;
+  border-radius: 50% / 60%; border: 1.6px solid #8a5f3c; background: #fdfaf1; display: flex; align-items: center; justify-content: center;
+  transition: width .25s cubic-bezier(.2,.7,.2,1), height .25s cubic-bezier(.2,.7,.2,1), margin .25s cubic-bezier(.2,.7,.2,1), background .25s; mix-blend-mode: multiply; }
+.oj-cursor .pupil { width: 8px; height: 8px; border-radius: 50%; background: #2c261f; box-shadow: inset 2px -2px 0 -1px #fdfaf1; }
+.oj-cursor.big { width: 52px; height: 34px; margin: -17px 0 0 -26px; background: #efe5d1; }
+.oj-cursor.big .pupil { width: 12px; height: 12px; }
+@media (pointer: fine) { .motion-on body, .motion-on a, .motion-on button { cursor: none; } .motion-on input, .motion-on select, .motion-on textarea { cursor: text; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; transition: none !important; }
+}
