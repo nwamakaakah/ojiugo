@@ -49,7 +49,7 @@ if (reduce) {
   const lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
+  gsap.ticker.lagSmoothing(400, 33);   // if the browser stalls a frame (e.g. while a new page is being shown), carry on rather than jumping to the end
   new MutationObserver(() => (document.body.style.overflow === 'hidden' ? lenis.stop() : lenis.start()))
     .observe(document.body, { attributes: true, attributeFilter: ['style'] });
 
@@ -85,32 +85,42 @@ if (reduce) {
     // tumble in: each word drops from a little below with a tilt and lands with a soft bounce.
     // Starts straight away (no delay); opacity eases quickly so nothing feels like it's waiting.
     gsap.set(words, { transformOrigin: '50% 90%' });
-    gsap.from(words, { yPercent: 70, rotation: () => rand(-16, 16), scale: 0.86, duration: 0.85, ease: 'back.out(1.9)', stagger: 0.05 });
-    gsap.from(words, { opacity: 0, duration: 0.35, ease: 'power1.out', stagger: 0.05 });
-  }
-  document.documentElement.classList.remove('h1-wait');
+    const tilt = words.map(() => rand(-16, 16));
+    const tl = gsap.timeline({ paused: true })
+      .from(words, { yPercent: 70, rotation: (i: number) => tilt[i], scale: 0.86, duration: 0.85, ease: 'back.out(1.9)', stagger: 0.05 }, 0)
+      .from(words, { opacity: 0, duration: 0.35, ease: 'power1.out', stagger: 0.05 }, 0);
+    tl.progress(0.0001);                                  // words sit at their starting pose (invisible) until we play
+    document.documentElement.classList.remove('h1-wait');
+    // start on the first frame people can actually see: right away on a fresh load, or as the old page finishes fading on a page change
+    const reveal = (window as unknown as { __ojReveal?: Promise<ViewTransition | null> }).__ojReveal ?? Promise.resolve(null);
+    reveal.then(async (vt) => {
+      if (vt) { try { await vt.ready; } catch { /* skipped */ } await new Promise((r) => setTimeout(r, 90)); }
+      requestAnimationFrame(() => tl.play());
+    });
+  } else document.documentElement.classList.remove('h1-wait');
   gsap.from($('main section:first-of-type :is(.t-overline, .lede, .t-body-lg, .badges, .nl, .intro-text > p)'), { y: 12, opacity: 0, duration: 0.6, ease: 'power3.out', stagger: 0.06, delay: 0.2 });
 
   // "birds" flaps its letters on a loop, and hops when you hover it
   $('.birds').forEach((el) => {
     const chars = splitChars(el);
     gsap.set(chars, { transformOrigin: '50% 100%' });
-    // a quick double wing-flap: letters lift and tilt left/right, then settle with a little bounce
+    // the wing-flap: letters lift and tilt one way, swing to the other, then bounce back to rest.
+    // Same moves as before, but every step glides (sine in/out) and the bounce is softer, so nothing snaps.
     let busy = false;
-    const flap = (sing = true) => {
+    const flap = () => {
       if (busy) return; busy = true;
-      if (sing) chirp();
+      chirp();
       gsap.timeline({ onComplete: () => { busy = false; } })
-        .to(chars, { y: -6, rotation: (i) => (i % 2 ? 9 : -9), duration: 0.13, ease: 'power2.out', stagger: 0.025 })
-        .to(chars, { y: -2, rotation: (i) => (i % 2 ? -6 : 6), duration: 0.12, ease: 'sine.inOut', stagger: 0.025 })
-        .to(chars, { y: 0, rotation: 0, duration: 0.45, ease: 'back.out(2.6)', stagger: 0.025 });
+        .to(chars, { y: -6, rotation: (i) => (i % 2 ? 9 : -9), duration: 0.24, ease: 'sine.out', stagger: 0.03 })
+        .to(chars, { y: -2, rotation: (i) => (i % 2 ? -6 : 6), duration: 0.26, ease: 'sine.inOut', stagger: 0.03 }, '-=0.1')
+        .to(chars, { y: 0, rotation: 0, duration: 0.7, ease: 'back.out(1.6)', stagger: 0.03 }, '-=0.1');
     };
     el.addEventListener('mouseenter', () => flap()); el.addEventListener('click', () => flap());
     // …and on its own every few seconds while it's on screen (it can only chirp once the visitor has clicked or tapped somewhere — browsers keep pages silent until then)
     let seen = false;
     new IntersectionObserver(([e]) => { seen = e.isIntersecting; }).observe(el);
     const again = () => setTimeout(() => { if (seen && !document.hidden) flap(); again(); }, rand(3800, 6200));
-    setTimeout(() => { if (seen) flap(false); again(); }, 1400);
+    setTimeout(() => { if (seen) flap(); again(); }, 1400);
   });
 
   /* ---------- below the first screen: just parallax ---------- */

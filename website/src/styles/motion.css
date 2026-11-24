@@ -3,8 +3,9 @@
 
 /* page changes: a soft cross-fade with a slight rise (browsers that support cross-document view transitions) */
 @view-transition { navigation: auto; }
-::view-transition-old(root) { animation: 180ms ease-out both oj-fade-out; }
-::view-transition-new(root) { animation: 240ms ease-out both oj-fade-in; }
+/* the old page leaves quickly first, so the two headlines never sit on top of each other */
+::view-transition-old(root) { animation: 130ms ease-in both oj-fade-out; }
+::view-transition-new(root) { animation: 200ms ease-out 90ms both oj-fade-in; }
 .site-header { view-transition-name: oj-header; }          /* header stays put while the page changes */
 ::view-transition-group(oj-header) { animation-duration: 0s; }
 @keyframes oj-fade-out { to { opacity: 0; } }

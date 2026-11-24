@@ -29,7 +29,9 @@ const fullTitle = title ? `${title} · ọjịugo` : 'ọjịugo';
 <html lang="en">
   <head>
     <!-- hide the headline until motion.ts has split it into words, so it never flashes in then jumps -->
-    <script is:inline>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('h1-wait');setTimeout(function(){document.documentElement.classList.remove('h1-wait')},2500)}</script>
+    <script is:inline>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('h1-wait');setTimeout(function(){document.documentElement.classList.remove('h1-wait')},2500)}
+    /* resolves when this page is first actually shown (after the page-change fade has begun), so the headline animates where people can see it */
+    window.__ojReveal=new Promise(function(r){if(!('onpagereveal' in window)){r(null);return}addEventListener('pagereveal',function(e){r(e.viewTransition||null)},{once:true});setTimeout(function(){r(null)},1500)});</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
