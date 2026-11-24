@@ -1,46 +1,79 @@
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Button, T } from '../components/ui';
+import { ArrowIcon, T } from '../components/ui';
 import { TabBar } from '../components/TabBar';
+import { Stamp } from '../components/Stamp';
 import { useAuth } from '../lib/auth';
+import { MILESTONES, monthYear, shortDate, useStats } from '../lib/entries';
 import { useTheme } from '../theme/ThemeProvider';
-import { SEASONS, radius, space } from '../theme/tokens';
+import { radius, space } from '../theme/tokens';
 
-// Temporary "me" screen: season + daylight/lamplight switches until the Profile & Theme flows are built.
-export default function Me() {
-  const { colors, season, setSeason, appearance, setAppearance } = useTheme();
-  const { user, signOut, isDemo } = useAuth();
-  const chip = (label: string, on: boolean, onPress: () => void) => (
-    <Pressable key={label} onPress={onPress} accessibilityState={{ selected: on }}
-      style={{ paddingHorizontal: space.lg, height: 40, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1, borderColor: on ? colors.actionPrimary : colors.borderDefault, backgroundColor: on ? colors.softInteractiveFill : 'transparent' }}>
-      <T v="ui" color={on ? colors.softInteractiveLabel : colors.textSubtle}>{label}</T>
-    </Pressable>
-  );
+// Profile / Stats — Active · New User · Milestones Earned (Figma 2012:9761 / 10011 / 9880)
+export default function Profile() {
+  const { colors } = useTheme();
+  const { user } = useAuth();
+  const stats = useStats();
+  const isNew = stats.sightings === 0;
+  // TODO: replace with the real leaderboard rank once flocks/leaderboard exist.
+  const rank = stats.sightings >= 20 ? 'top 100 birders' : stats.sightings >= 5 ? 'top 1k birders' : 'top 10k birders';
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgApp }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: space.lg, gap: space['2xl'] }}>
-        <View style={{ gap: space.xs }}>
-          <T v="displayLg">{user?.name ? `hello, ${user.name}` : 'your diary'}</T>
-          <T v="bodyMd" color={colors.textSubtle}>{user?.email}{user?.country ? ` · ${user.country}` : ''}</T>
-          {isDemo ? <T v="caption" color={colors.textLight}>demo mode — saved on this device only</T> : null}
-        </View>
-        <View style={{ gap: space.md }}>
-          <T v="overline" color={colors.textLight}>season</T>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-            {SEASONS.map((s) => chip(s.label, season === s.id, () => setSeason(s.id)))}
+      <ScrollView contentContainerStyle={{ paddingHorizontal: space.lg, paddingBottom: space['2xl'], gap: space.xl }}>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/settings')} hitSlop={10} style={styles.nest}>
+          <T v="ui">nestkeeping</T>
+          <ArrowIcon color={colors.iconDefault} />
+        </Pressable>
+
+        <View style={{ alignItems: 'center', gap: space.xs }}>
+          <T v="displayLg" style={{ fontSize: 26, lineHeight: 30 }}>{user?.name?.toLowerCase() || 'birder'}</T>
+          <T v="bodyMd" color={colors.textSubtle}>
+            {isNew ? 'brand new diary' : `keeping this diary since ${user?.createdAt ? monthYear(user.createdAt) : 'today'}`}
+          </T>
+          <View style={[styles.rank, { borderColor: colors.borderSubtle, backgroundColor: colors.surfacePage }]}>
+            <T v="ui">{rank}</T>
+            <ArrowIcon color={colors.iconDefault} />
           </View>
         </View>
-        <View style={{ gap: space.md }}>
-          <T v="overline" color={colors.textLight}>light</T>
-          <View style={{ flexDirection: 'row', gap: space.sm }}>
-            {chip('daylight', appearance === 'daylight', () => setAppearance('daylight'))}
-            {chip('lamplight', appearance === 'lamplight', () => setAppearance('lamplight'))}
-          </View>
+
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          {[[stats.species, 'species met'], [stats.sightings, 'sightings'], [stats.thisWeek, 'this week']].map(([n, l]) => (
+            <View key={l} style={[styles.stat, { backgroundColor: colors.surfacePage }]}>
+              <T v="title" style={{ fontSize: 30, lineHeight: 36 }}>{String(n)}</T>
+              <T v="overline" color={colors.textLight}>{l}</T>
+            </View>
+          ))}
         </View>
-        <Button title="close my diary" arrow={false} onPress={async () => { await signOut(); router.replace('/welcome'); }} />
+
+        <View style={{ gap: space.sm }}>
+          <T v="overline" color={colors.textLight}>little milestones</T>
+          {MILESTONES.map((m) => {
+            const got = stats.earned[m.id];
+            return (
+              <Pressable key={m.id} disabled={!got} onPress={() => router.push({ pathname: '/milestone', params: { id: m.id } })}
+                style={[styles.milestone, { backgroundColor: colors.surfacePage }]} accessibilityLabel={`${m.title}, ${got ? 'earned' : 'yet to come'}`}>
+                {got ? <Stamp color={m.colorKey} size={28} /> : <View style={[styles.empty, { borderColor: colors.borderSubtle }]} />}
+                <View style={{ flex: 1, gap: 2 }}>
+                  <T v="ui" color={got ? colors.textDefault : colors.textSubtle}>{m.title}</T>
+                  <T v="caption" color={colors.textLight}>
+                    {got ? `${m.earned.replace('{species}', got.species ?? 'bird')} • ${shortDate(got.date)}` : `yet to come — ${m.todo}`}
+                  </T>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
       </ScrollView>
       <TabBar active="me" />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  nest: { alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingTop: space.lg },
+  rank: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, height: 32, borderRadius: radius.pill, borderWidth: 1, marginTop: space.xs },
+  stat: { flex: 1, alignItems: 'center', gap: space.sm, paddingVertical: space.lg, borderRadius: radius.lg },
+  milestone: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, paddingVertical: space.md, borderRadius: radius.md },
+  empty: { width: 28, height: 28, borderRadius: 14, borderWidth: 1 },
+});

@@ -1,8 +1,14 @@
 ---
+import { getAppHref } from '../data/site';
 interface Props { variant?: 'nav' | 'back' | 'none'; backHref?: string; backLabel?: string; }
 const { variant = 'nav', backHref = '/', backLabel = 'back' } = Astro.props;
 const path = Astro.url.pathname;
-const onFieldlog = path.startsWith('/fieldlog');
+const links = [
+  { href: '/leaderboard', label: 'leaderboard' },
+  { href: '/shop', label: 'shop' },
+  { href: '/blog', label: 'birdie blog' },
+];
+const isActive = (href: string) => path === href || path.startsWith(href + '/');
 ---
 {variant !== 'none' && (
 <header class="site-header">
@@ -13,20 +19,24 @@ const onFieldlog = path.startsWith('/fieldlog');
         {backLabel}
       </a>
     ) : (
-      <>
-        <a class="pill brand" href="/" aria-label="ọjịugo home">
-          <img class="logo" src="/illustrations/logo-nav.svg" alt="" width="47" height="39" />
-          <span class="word">ọjịugo</span>
-        </a>
+      <a class="pill brand" href="/" aria-label="ọjịugo home">
+        <img class="logo" src="/illustrations/logo-nav.svg" alt="" width="47" height="39" />
+        <span class="word">ọjịugo</span>
+      </a>
+    )}
+    <div class="right">
+      {variant === 'nav' && (
         <nav class="pill links" aria-label="Main">
-          <a class="t-button" href="/fieldlog" aria-current={onFieldlog ? 'page' : undefined}>my fieldlog</a>
-          <a class="t-button" href="/" aria-current={!onFieldlog ? 'page' : undefined}>birdie blog</a>
+          {links.map((l) => <a class="t-button" href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>)}
         </nav>
+      )}
+      <span class="pill cta-pill"><a class="get t-button" href={getAppHref}>get the app</a></span>
+      {variant === 'nav' && (
         <button class="pill menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
           <img src="/icons/hamburger.svg" alt="" width="29" height="16" />
         </button>
-      </>
-    )}
+      )}
+    </div>
   </div>
 </header>
 )}
@@ -43,9 +53,8 @@ const onFieldlog = path.startsWith('/fieldlog');
       </button>
     </div>
     <nav class="menu-links" aria-label="Mobile">
-      <a href="/fieldlog">fieldlog</a>
-      <a href="/">birdie blog</a>
-      <a class="btn t-button" href="/waitlist">join our waitlist <span class="icon"><img src="/icons/arrow.svg" alt="" /></span></a>
+      {links.map((l) => <a href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>{l.label}</a>)}
+      <a class="btn t-button" href={getAppHref}>get the app <span class="icon"><img src="/icons/arrow.svg" alt="" /></span></a>
     </nav>
   </div>
 )}
@@ -69,7 +78,8 @@ const onFieldlog = path.startsWith('/fieldlog');
 <style>
   .site-header { position: fixed; top: 59px; left: 0; right: 0; z-index: 50; padding: 0 var(--gutter); pointer-events: none; }
   .bar { max-width: var(--content); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-  .bar > * { pointer-events: auto; }
+  .bar > *, .right > * { pointer-events: auto; }
+  .right { display: flex; align-items: center; gap: 12px; }
   .brand { gap: 4.86px; }
   .brand .logo { width: 46.1px; height: 38.9px; }
   .word { font-weight: 600; font-size: 17.02px; line-height: 19.45px; letter-spacing: 0.24px; color: var(--text-default); }
@@ -81,6 +91,9 @@ const onFieldlog = path.startsWith('/fieldlog');
     content: ''; position: absolute; left: 50%; bottom: -8px; width: 5px; height: 5px;
     border-radius: 50%; background: var(--action-primary); transform: translateX(-50%);
   }
+  .cta-pill { padding: 8px; }
+  .get { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: var(--radius-pill); background: var(--action-primary); color: var(--text-on-primary); transition: background .2s ease; }
+  .get:hover { background: var(--action-primary-hover); }
   .back { gap: 8px; color: var(--text-default); }
   .back-icon { display: flex; padding: 4px 0; transform: rotate(180deg); }
   .back-icon img { width: 17.81px; height: 7.7px; }
@@ -92,12 +105,14 @@ const onFieldlog = path.startsWith('/fieldlog');
   .menu-close img { transform: rotate(-45deg); width: 24px; height: 24px; }
   .menu-links { display: flex; flex-direction: column; gap: 48px; padding: 150px var(--gutter) 0; }
   .menu-links > a:not(.btn) { padding: 8px 12px; font-weight: 500; font-size: 24px; line-height: 32px; color: var(--text-light); }
+  .menu-links > a[aria-current='page'] { color: var(--text-default); }
   .menu-links .btn { width: 100%; }
 
-  @media (max-width: 760px) {
+  @media (max-width: 1024px) {
     .site-header { top: 25px; }
     .bar { max-width: none; }
     .links { display: none; }
+    .site-header .cta-pill { display: none; }
     .menu-btn, .menu-close { display: inline-flex; }
     .brand .logo { width: 32.57px; height: 27.48px; }
     .brand { gap: 3.44px; }

@@ -1,0 +1,21 @@
+---
+// Phone mock: rounded frame + status bar; content goes in the slot.
+interface Props { frame?: string; class?: string; tilt?: number }
+const { frame = '#575f47', class: cls = '', tilt = 0 } = Astro.props;
+---
+<div class={`phone ${cls}`} style={`--frame:${frame};--tilt:${tilt}deg`} aria-hidden="true">
+  <div class="screen">
+    <div class="status">
+      <span>9:41</span>
+      <svg viewBox="0 0 54 11"><g fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".7"/><rect x="4.5" y="5" width="3" height="6" rx=".7"/><rect x="9" y="3" width="3" height="8" rx=".7"/><rect x="13.5" y="1" width="3" height="10" rx=".7"/><path d="M27 2.2c2.4 0 4.6.9 6.2 2.5l1.1-1.1A10.3 10.3 0 0 0 27 .6c-2.8 0-5.4 1.1-7.3 3l1.1 1.1A8.7 8.7 0 0 1 27 2.2Zm0 3.3c1.5 0 2.9.6 3.9 1.6l1.1-1.1A7 7 0 0 0 27 3.9a7 7 0 0 0-5 2.1l1.1 1.1c1-1 2.4-1.6 3.9-1.6Zm0 3.3c.6 0 1.2.2 1.6.7L27 11l-1.6-1.5c.4-.5 1-.7 1.6-.7Z"/><rect x="38.5" y="1" width="13" height="9" rx="2.4" fill="none" stroke="currentColor" opacity=".4"/><rect x="40" y="2.5" width="10" height="6" rx="1.4"/><rect x="52.3" y="3.8" width="1.4" height="3.4" rx=".6" opacity=".4"/></g></svg>
+    </div>
+    <slot />
+  </div>
+</div>
+
+<style>
+  .phone { position: relative; border: 4px solid var(--frame); border-radius: 34px; background: #f4efe3; overflow: hidden; transform: rotate(var(--tilt)); box-shadow: 0 10px 30px rgba(68,73,54,.14); }
+  .screen { position: relative; height: 100%; padding: 0 14px; color: #221d17; font-size: 9px; line-height: 13px; }
+  .status { display: flex; justify-content: space-between; align-items: center; height: 30px; padding: 0 6px; font-weight: 600; font-size: 10px; }
+  .status svg { width: 38px; height: 9px; color: #221d17; }
+</style>

@@ -17,7 +17,7 @@ const { variant = 'full' } = Astro.props;
         <div class="foot-links">
           <p class="t-overline">Resources</p>
           <ul class="t-button">
-            <li><a href="/">blog</a></li>
+            <li><a href="/blog">blog</a></li>
             <li><a href="mailto:hello@ojiugo.com">contact us</a></li>
             <li><a href="/privacy">privacy policy</a></li>
             <li><a href="/terms">terms of use</a></li>
@@ -28,7 +28,7 @@ const { variant = 'full' } = Astro.props;
   )}
   <section class="section copy">
     <div class="inner">
-      <p class="t-body-md">© 2026 ọjịugo · <span class="d">your cosy little bird diary</span><span class="m">your pocket field journal</span></p>
+      <p class="t-body-md">© 2026 ọjịugo · your pocket field journal</p>
     </div>
   </section>
 </footer>
@@ -46,7 +46,7 @@ const { variant = 'full' } = Astro.props;
   .foot-links a:hover { color: var(--text-interactive); }
   .copy { padding-top: 40px; padding-bottom: 40px; }
   .m { display: none; }
-  @media (max-width: 760px) {
+  @media (max-width: 1024px) {
     .foot { padding-top: 64px; padding-bottom: 64px; }
     .foot-inner { gap: 48px; }
     .foot-logo { gap: 9.78px; }

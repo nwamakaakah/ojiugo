@@ -7,6 +7,7 @@ import { Caveat_700Bold } from '@expo-google-fonts/caveat';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '../theme/ThemeProvider';
 import { AuthProvider } from '../lib/auth';
+import { ToastProvider } from '../components/Toast';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -28,7 +29,9 @@ export default function Layout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
-          <Root />
+          <ToastProvider>
+            <Root />
+          </ToastProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

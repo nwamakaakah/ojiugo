@@ -41,15 +41,6 @@
     ],
     "experiments": {
       "typedRoutes": false
-    },
-    "extra": {
-      "router": {
-        "asyncRoutes": false
-      },
-      "eas": {
-        "projectId": "0f0b250c-a229-4985-8481-a598bfb52af4"
-      }
-    },
-    "owner": "nwamaka"
+    }
   }
 }

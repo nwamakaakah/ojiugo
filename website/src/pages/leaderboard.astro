@@ -1,0 +1,130 @@
+---
+// Leaderboard (Figma "Website" → Desktop 2012:3838 / Mobile 2012:1773)
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { BOARD, YOU } from '../data/leaderboard';
+import Newsletter from '../components/Newsletter.astro';
+// Flip to false once real rankings come from the app.
+const COMING_SOON = true;
+const periods = [['week', 'this week'], ['month', 'this month'], ['all', 'all time']] as const;
+const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : Math.min(n % 10, 4) % 4] ?? 'th'}`;
+---
+<Base title="leaderboard" description="every sighting you log counts — here's how the ọjịugo flock stacks up.">
+  <section class="section intro">
+    <div class="inner center">
+      <p class="t-overline">the birding band</p>
+      <h1>who’s been out birding?</h1>
+      <p class="t-body-lg">every sighting you log counts. here’s how the ọjịugo flock stacks up — ranked purely by observations</p>
+      {!COMING_SOON && <div class="tabs" role="tablist" aria-label="time period">
+        {periods.map(([k, label], i) => <button role="tab" class="tab t-ui" data-tab={k} aria-selected={i === 0 ? 'true' : 'false'}>{label}</button>)}
+      </div>}
+    </div>
+  </section>
+
+  {COMING_SOON ? (
+  <section class="section board-wrap">
+    <div class="inner soon">
+      <img class="nest" src="/illustrations/nest.svg" alt="" width="120" height="86" />
+      <p class="t-overline">coming soon</p>
+      <h2>the flock is still gathering</h2>
+      <p class="t-body-lg">the leaderboard opens once the app is out and birders start logging. we’ll write to you the moment it’s live</p>
+      <div class="soon-form"><Newsletter id="soon-email" /></div>
+    </div>
+  </section>
+  ) : (
+  <section class="section board-wrap">
+    <div class="inner">
+      {periods.map(([k], pi) => {
+        const list = BOARD[k];
+        const podium = [list[1], list[0], list[2]];
+        return (
+          <div class="board" data-panel={k} role="tabpanel" hidden={pi !== 0}>
+            <ol class="podium">
+              {podium.map((b, i) => {
+                const rank = [2, 1, 3][i];
+                return (
+                  <li class={`top r${rank}`}>
+                    <span class="badge">{ord(rank)}</span>
+                    <p class="name">{b.name}</p>
+                    <p class="t-body-md">{b.place}</p>
+                    <p class="num">{b.observations}</p>
+                    <p class="t-caption">observations • {b.species} species</p>
+                  </li>
+                );
+              })}
+            </ol>
+            <ol class="rest" start="4">
+              {list.slice(3).map((b, i) => (
+                <li class="row">
+                  <span class="badge">{ord(i + 4)}</span>
+                  <div class="who"><p class="t-label">{b.name}</p><p class="t-caption">{b.place}</p></div>
+                  <p class="t-caption stat">{b.observations} observations • {b.species} species</p>
+                </li>
+              ))}
+            </ol>
+            <div class="row me" aria-label="your rank">
+              <span class="badge">{ord(YOU.rank)}</span>
+              <div class="who"><p class="t-label">{YOU.name}</p><p class="t-caption">{YOU.place}</p></div>
+              <div class="me-r"><span class="you">you</span><p class="t-caption stat">{YOU.observations} observations • {YOU.species} species</p></div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+  )}
+
+  <CtaBand />
+</Base>
+
+<script>
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+  tabs.forEach((t) => t.addEventListener('click', () => {
+    tabs.forEach((x) => x.setAttribute('aria-selected', String(x === t)));
+    document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== t.dataset.tab; });
+  }));
+</script>
+
+<style>
+  .intro { padding-top: 200px; }
+  .center { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  h1 { font-weight: 600; font-size: clamp(40px, 5vw, 64px); line-height: 1.094; max-width: 520px; }
+  .center > .t-body-lg { max-width: 560px; }
+  .tabs { display: inline-flex; gap: 4px; padding: 4px; margin-top: 48px; border-radius: 999px; background: #e9e3d3; }
+  .tab { border: 0; background: transparent; cursor: pointer; padding: 10px 16px; border-radius: 999px; color: var(--text-subtle); }
+  .tab[aria-selected='true'] { background: var(--surface-page); color: var(--text-default); box-shadow: var(--shadow-sm); }
+  .board-wrap { padding-top: 48px; padding-bottom: 100px; }
+  .board { display: flex; flex-direction: column; gap: 64px; position: relative; }
+  .board[hidden] { display: none; }
+  ol { list-style: none; margin: 0; padding: 0; }
+  .podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .top { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 24px; background: var(--surface-page); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); text-align: center; }
+  .badge { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 40px; padding: 0 10px; border-radius: 999px; font-size: 13px; color: var(--text-subtle); background: #e9e3d3; flex: none; }
+  .r1 .badge { background: #e0dce1; color: #605668; } .r2 .badge { background: #ebdfdb; color: #7e5e59; } .r3 .badge { background: #eed9ca; color: #854e2c; }
+  .name { font-weight: 600; font-size: 20px; line-height: 26px; margin-top: 8px; }
+  .num { font-weight: 600; font-size: 32px; line-height: 40px; margin-top: 16px; }
+  .rest { display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface-page); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .who { flex: 1; }
+  .stat { text-align: right; }
+  .me { position: sticky; bottom: 24px; background: #e9e3d3; border: 1px solid #afb7a2; box-shadow: 0 8px 24px rgba(68,73,54,.18); }
+  .me .badge { background: #605668; color: #fdfaf1; }
+  .me-r { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .you { padding: 3px 10px; border-radius: 999px; background: #886e3d; color: #fdfaf1; font-size: 11px; }
+  .soon { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 64px 24px; background: var(--surface-page); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
+  .soon .nest { width: 120px; height: auto; margin-bottom: 8px; }
+  .soon h2 { font-weight: 600; font-size: 32px; line-height: 40px; }
+  .soon > .t-body-lg { max-width: 520px; }
+  .soon-form { width: 100%; max-width: 680px; margin-top: 24px; text-align: left; }
+  .soon-form :global(.nl-text) { display: none; }
+  @media (max-width: 1024px) {
+    .soon { padding: 48px 16px; }
+    .soon h2 { font-size: 26px; line-height: 32px; }
+    h1 { font-size: 40px; line-height: 48px; }
+    .tabs { margin-top: 24px; }
+    .podium { grid-template-columns: 1fr; }
+    .podium .r1 { order: -1; }
+    .board { gap: 32px; }
+    .stat { max-width: 120px; }
+  }
+</style>

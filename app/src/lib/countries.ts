@@ -24,3 +24,11 @@ export function currentSeasonFor(c: Country, date = new Date()): Season {
   const order: Season[] = ['spring', 'summer', 'autumn', 'winter'];
   return order[south ? (idx + 2) % 4 : idx];
 }
+
+export const SEASON_NAME: Record<Season, string> = { spring: 'spring', summer: 'summer', autumn: 'autumn', winter: 'winter', wet: 'rainy', dry: 'dry' };
+export const countryByName = (name?: string) => COUNTRIES.find((c) => c.name === name);
+/** "spring, summer, autumn & winter" / "rainy & dry" */
+export const seasonsSentence = (c: Country) => {
+  const n = (c.seasons.includes('wet') ? ['wet', 'dry'] as Season[] : c.seasons).map((s) => SEASON_NAME[s]);
+  return n.length > 1 ? `${n.slice(0, -1).join(', ')} & ${n[n.length - 1]}` : n[0];
+};

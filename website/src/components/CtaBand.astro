@@ -1,23 +1,27 @@
 ---
-import Arrow from './Arrow.astro';
+import StoreBadges from './StoreBadges.astro';
+interface Props { variant?: 'home' | 'page' }
+const { variant = 'page' } = Astro.props;
+const over = variant === 'home' ? 'it’s free — no catch' : 'it’s free to start';
+const sub = variant === 'home' ? 'your first sighting is waiting outside' : 'Your first bird is waiting';
 ---
-<section class="section cta" aria-labelledby="cta-title">
+<section class="section cta" id="get-the-app" aria-labelledby="cta-title">
   <img class="art branch-left" src="/illustrations/branch-left.svg" alt="" width="274" height="204" />
   <img class="art branch-right" src="/illustrations/branch-right.svg" alt="" width="216" height="161" />
   <img class="art grass-left" src="/illustrations/grass-left.svg" alt="" width="80" height="111" />
   <img class="art grass-right" src="/illustrations/grass-right.svg" alt="" width="79" height="119" />
   <div class="inner cta-inner">
     <div class="cta-text">
-      <p class="t-overline"><span class="d">it's free to start</span><span class="m">it's free — no catch</span></p>
+      <p class="t-overline">{over}</p>
       <h2 id="cta-title">begin your diary today</h2>
-      <p class="t-body-lg sub"><span class="d">Your first bird is waiting</span><span class="m">your first sighting is waiting outside</span></p>
+      <p class="t-body-lg sub">{sub}</p>
     </div>
-    <a class="btn t-button cta-btn" href="/waitlist">join our waitlist <Arrow /></a>
+    <StoreBadges />
   </div>
 </section>
 
 <style>
-  .cta { position: relative; overflow: hidden; background: var(--nav-glass-fill); padding-top: 150px; padding-bottom: 150px; }
+  .cta { position: relative; overflow: hidden; background: var(--surface-page); padding-top: 150px; padding-bottom: 150px; }
   .cta-inner { position: relative; display: flex; align-items: center; gap: 100px; }
   .cta-text { flex: 1; display: flex; flex-direction: column; gap: 24px; }
   h2 { font-weight: 600; font-size: clamp(32px, 3.75vw, 48px); line-height: 1.167; }
@@ -28,7 +32,10 @@ import Arrow from './Arrow.astro';
   .grass-left { left: 2.73%; bottom: 0; width: 80px; height: 111px; }
   .grass-right { right: 3.62%; bottom: 0; width: 79px; height: 119px; }
   .m { display: none; }
-  @media (max-width: 760px) {
+  @media (max-width: 1024px) {
+    .cta-inner { flex-direction: column; align-items: flex-start; gap: 40px; }
+  }
+  @media (max-width: 1024px) {
     .cta { background: var(--surface-page); padding-top: 100px; padding-bottom: 100px; }
     .cta-inner { flex-direction: column; align-items: stretch; gap: 48px; }
     h2 { font-size: 32px; line-height: 40px; }

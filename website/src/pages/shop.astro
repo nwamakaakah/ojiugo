@@ -1,0 +1,166 @@
+---
+// Shop (Figma "Website" → Desktop 2012:4179 / Mobile 2012:2109)
+import Base from '../layouts/Base.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { PRODUCTS, CATEGORIES } from '../data/shop';
+import Newsletter from '../components/Newsletter.astro';
+// Flip to false when the shop is ready to take orders.
+const COMING_SOON = true;
+const icons = {
+  feather: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M7 26c4-8 9-14 18-19-1.5 8-5.5 14.5-13.5 17"/><path d="M7 26l6.5-8"/></svg>',
+  ring: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 5.5c6.2-.2 10.7 4.4 10.5 10.6-.2 5.8-4.8 10.4-10.7 10.3C10 26.3 5.4 21.5 5.6 15.7 5.8 10 10.3 5.6 16 5.5Z"/></svg>',
+  book: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="5" width="16" height="22" rx="2"/><path d="M12 5v22M15.5 11h5M15.5 15h5"/></svg>',
+};
+---
+<Base title="shop" description="field-worthy bits and pretty little keepsakes for people who look up.">
+  <section class="section intro">
+    <div class="inner center">
+      <p class="t-overline">the shop</p>
+      <h1>bits &amp; keepsakes for birders</h1>
+      <p class="t-body-lg">field-worthy bits and pretty little keepsakes for people who look up — made to be used, carried and loved</p>
+    </div>
+  </section>
+
+  {COMING_SOON ? (
+  <section class="section list">
+    <div class="inner soon">
+      <img class="nest" src="/illustrations/nest.svg" alt="" width="120" height="86" />
+      <p class="t-overline">coming soon</p>
+      <h2>the shelves are still being stocked</h2>
+      <p class="t-body-lg">field journals, totes and little keepsakes are on their way — and 10% of every sale will go to bird conservation. we’ll write to you the day the shop opens</p>
+      <div class="soon-form"><Newsletter id="shop-soon-email" /></div>
+    </div>
+  </section>
+  ) : (
+  <section class="section list">
+    <div class="inner list-inner">
+      <form class="inputs" role="search" onsubmit="return false">
+        <label class="search">
+          <span class="sr-only">search the shop</span>
+          <img class="search-icon" src="/icons/search.svg" alt="" />
+          <input type="search" placeholder="search..." data-search autocomplete="off" />
+        </label>
+        <label class="select">
+          <span class="sr-only">filter by category</span>
+          <select data-cat>
+            {CATEGORIES.map((c, i) => <option value={i === 0 ? '' : c}>{i === 0 ? 'by category' : c}</option>)}
+          </select>
+          <img class="chev" src="/icons/chevron.svg" alt="" />
+        </label>
+        <label class="select">
+          <span class="sr-only">sort by price</span>
+          <select data-sort>
+            <option value="">by price</option>
+            <option value="asc">low to high</option>
+            <option value="desc">high to low</option>
+          </select>
+          <img class="chev" src="/icons/chevron.svg" alt="" />
+        </label>
+      </form>
+
+      <ul class="items" data-items>
+        {PRODUCTS.map((p, i) => (
+          <li class="card" data-item data-i={i} data-cat={p.category} data-price={p.price} data-text={`${p.name} ${p.blurb} ${p.category}`.toLowerCase()}>
+            <div class={`art ${p.tone}`}><span class="glyph" set:html={icons[p.icon]} /></div>
+            <div class="card-text">
+              <h2>{p.name}</h2>
+              <p class="t-body-md">{p.blurb}</p>
+              <div class="buy">
+                <span class="price">${p.price}</span>
+                <button class="add t-button" type="button" data-add>add to cart</button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="t-body-md empty" data-empty hidden>nothing by that name yet — try another word?</p>
+
+      <aside class="gives">
+        <p class="t-hand-note">every order gives back</p>
+        <p class="t-body-md">10% of every sale goes to bird conservation. buy a tote, plant a hedgerow — near enough. 🌿</p>
+      </aside>
+      <p class="t-body-sm note" role="status" aria-live="polite" data-note></p>
+    </div>
+  </section>
+  )}
+
+  <CtaBand />
+</Base>
+
+<script>
+  const search = document.querySelector<HTMLInputElement>('[data-search]')!;
+  const cat = document.querySelector<HTMLSelectElement>('[data-cat]')!;
+  const sort = document.querySelector<HTMLSelectElement>('[data-sort]')!;
+  const list = document.querySelector<HTMLElement>('[data-items]')!;
+  const items = [...document.querySelectorAll<HTMLElement>('[data-item]')];
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const apply = () => {
+    const q = search.value.trim().toLowerCase(); const c = cat.value; let n = 0;
+    items.forEach((el) => { const ok = (!q || el.dataset.text!.includes(q)) && (!c || el.dataset.cat === c); el.hidden = !ok; if (ok) n++; });
+    const sorted = [...items].sort((a, b) => sort.value === 'asc' ? +a.dataset.price! - +b.dataset.price! : sort.value === 'desc' ? +b.dataset.price! - +a.dataset.price! : +a.dataset.i! - +b.dataset.i!);
+    sorted.forEach((el) => list.appendChild(el));
+    empty.hidden = n > 0;
+  };
+  search.addEventListener('input', apply); cat.addEventListener('change', apply); sort.addEventListener('change', apply);
+  // The shop isn't taking orders yet — buttons acknowledge the tap instead of failing silently.
+  const note = document.querySelector<HTMLElement>('[data-note]')!;
+  document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((b) => b.addEventListener('click', () => {
+    b.textContent = 'saved for later ✓'; b.disabled = true;
+    note.textContent = 'the shop opens soon — we’ll send a letter when it does.';
+  }));
+</script>
+
+<style>
+  .intro { padding-top: 200px; }
+  .center { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  h1 { font-weight: 600; font-size: clamp(40px, 5vw, 64px); line-height: 1.094; max-width: 560px; }
+  .center > .t-body-lg { max-width: 560px; }
+  .list { padding-top: 100px; padding-bottom: 100px; }
+  .list-inner { display: flex; flex-direction: column; gap: 48px; }
+  .inputs { display: flex; gap: 16px; }
+  .search, .select { display: flex; align-items: center; gap: 12px; height: 64px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); }
+  .search { flex: 1; padding: 4px 16px 8px; }
+  .search-icon { width: 25.85px; height: 24px; }
+  .search input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 15px; line-height: 24px; color: var(--text-default); }
+  .search input::placeholder { color: var(--text-disabled); }
+  .search input:focus, .select select:focus { outline: none; }
+  .search:focus-within, .select:focus-within { border-color: var(--action-primary); }
+  .select { position: relative; background: var(--surface-page); padding: 4px 24px 8px; }
+  .select select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; font-size: 15px; line-height: 24px; color: var(--text-subtle); padding-right: 32px; cursor: pointer; }
+  .chev { position: absolute; right: 24px; width: 20px; height: 10px; pointer-events: none; }
+  .items { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .card { display: flex; flex-direction: column; background: var(--surface-page); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .card[hidden] { display: none; }
+  .art { height: 192px; display: flex; align-items: center; justify-content: center; }
+  .art.plum { background: #e0dce1; color: #605668; } .art.gold { background: #efe5d1; color: #886e3d; } .art.clay { background: #eadbd1; color: #7a533d; }
+  .glyph :global(svg) { width: 52px; height: 52px; }
+  .card-text { display: flex; flex-direction: column; gap: 12px; padding: 24px; }
+  h2 { font-weight: 600; font-size: 16px; line-height: 26px; }
+  .buy { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .price { font-weight: 600; font-size: 20px; }
+  .add { height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--action-primary); color: var(--text-on-primary); cursor: pointer; }
+  .add:hover { background: var(--action-primary-hover); }
+  .add:disabled { background: #e9e3d3; color: var(--text-subtle); cursor: default; }
+  .empty { text-align: center; }
+  .gives { align-self: center; width: 100%; max-width: 1024px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px; border-radius: var(--radius-lg); background: #e9e3d3; text-align: center; }
+  .note { text-align: center; margin-top: -24px; color: var(--text-interactive); min-height: 20px; }
+  .soon { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 64px 24px; background: var(--surface-page); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
+  .soon .nest { width: 120px; height: auto; margin-bottom: 8px; }
+  .soon h2 { font-weight: 600; font-size: 32px; line-height: 40px; }
+  .soon > .t-body-lg { max-width: 540px; }
+  .soon-form { width: 100%; max-width: 680px; margin-top: 24px; text-align: left; }
+  .soon-form :global(.nl-text) { display: none; }
+  @media (max-width: 1024px) { .soon { padding: 48px 16px; } .soon h2 { font-size: 26px; line-height: 32px; } }
+  @media (max-width: 960px) { .items { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 1024px) {
+    .intro { padding-top: 150px; }
+    h1 { font-size: 40px; line-height: 48px; }
+    .list { padding-top: 64px; padding-bottom: 64px; }
+    .list-inner { gap: 32px; }
+    .inputs { flex-wrap: wrap; }
+    .search { flex: 1 1 100%; }
+    .select { flex: 1; }
+    .select select { width: 100%; }
+    .items { grid-template-columns: 1fr; }
+  }
+</style>

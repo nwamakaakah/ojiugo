@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { supabase, isDemo } from './supabase';
 import { storage } from './storage';
 
-export type User = { id: string; email: string; name?: string; country?: string };
+export type User = { id: string; email: string; name?: string; country?: string; createdAt?: string };
 type Result = { error?: string };
 
 type AuthCtx = {
@@ -15,6 +15,9 @@ type AuthCtx = {
   verifyResetCode: (email: string, code: string) => Promise<Result>;
   updatePassword: (password: string) => Promise<Result>;
   updateProfile: (p: Partial<Pick<User, 'name' | 'country'>>) => Promise<Result>;
+  /** Checks the current password before setting a new one. */
+  changePassword: (current: string, next: string) => Promise<Result>;
+  deleteAccount: () => Promise<Result>;
   signOut: () => Promise<void>;
 };
 const Ctx = createContext<AuthCtx | null>(null);
@@ -31,7 +34,7 @@ const friendly = (msg?: string) => {
 };
 
 // ---------- demo mode: everything is kept on this device ----------
-type DemoAccount = { id: string; email: string; password: string; name?: string; country?: string };
+type DemoAccount = { id: string; email: string; password: string; name?: string; country?: string; createdAt?: string };
 const DEMO_KEY = 'ojiugo.demo.accounts';
 const DEMO_SESSION = 'ojiugo.demo.session';
 const DEMO_CODE = '123456';
@@ -45,12 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (supabase) {
       supabase.auth.getSession().then(({ data }) => {
         const u = data.session?.user;
-        setUser(u ? { id: u.id, email: u.email ?? '', name: u.user_metadata?.name, country: u.user_metadata?.country } : null);
+        setUser(u ? { id: u.id, email: u.email ?? '', name: u.user_metadata?.name, country: u.user_metadata?.country, createdAt: u.created_at } : null);
         setReady(true);
       });
       const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
         const u = session?.user;
-        setUser(u ? { id: u.id, email: u.email ?? '', name: u.user_metadata?.name, country: u.user_metadata?.country } : null);
+        setUser(u ? { id: u.id, email: u.email ?? '', name: u.user_metadata?.name, country: u.user_metadata?.country, createdAt: u.created_at } : null);
       });
       return () => sub.subscription.unsubscribe();
     }
@@ -60,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthCtx>(() => {
     const demoAccounts = () => storage.get<DemoAccount[]>(DEMO_KEY, []);
     const demoLogin = async (a: DemoAccount) => {
-      const u = { id: a.id, email: a.email, name: a.name, country: a.country };
+      const u = { id: a.id, email: a.email, name: a.name, country: a.country, createdAt: a.createdAt };
       await storage.set(DEMO_SESSION, u); setUser(u);
     };
     return {
@@ -72,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         const list = await demoAccounts();
         if (list.some((a) => a.email === email.toLowerCase())) return { error: friendly('already registered') };
-        const acc = { id: String(Date.now()), email: email.toLowerCase(), password, name };
+        const acc = { id: String(Date.now()), email: email.toLowerCase(), password, name, createdAt: new Date().toISOString() };
         await storage.set(DEMO_KEY, [...list, acc]); await demoLogin(acc); return {};
       },
       async signIn(email, password) {
@@ -124,6 +127,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const list = await demoAccounts();
         await storage.set(DEMO_KEY, list.map((a) => (a.id === user.id ? { ...a, ...p } : a)));
         await storage.set(DEMO_SESSION, next); setUser(next); return {};
+      },
+      async changePassword(current, next) {
+        const wrong = 'hmm, that’s not your current lock — mind checking?';
+        if (!user) return { error: wrong };
+        if (supabase) {
+          const check = await supabase.auth.signInWithPassword({ email: user.email, password: current });
+          if (check.error) return { error: wrong };
+          const { error } = await supabase.auth.updateUser({ password: next });
+          return { error: error ? friendly(error.message) : undefined };
+        }
+        const list = await demoAccounts();
+        const acc = list.find((a) => a.id === user.id);
+        if (!acc || acc.password !== current) return { error: wrong };
+        await storage.set(DEMO_KEY, list.map((a) => (a.id === user.id ? { ...a, password: next } : a)));
+        return {};
+      },
+      async deleteAccount() {
+        if (supabase) {
+          // Needs the `delete_my_account` database function — see README.
+          const { error } = await supabase.rpc('delete_my_account');
+          if (error) return { error: friendly(error.message) };
+          await supabase.auth.signOut(); setUser(null); return {};
+        }
+        if (!user) return {};
+        const list = await demoAccounts();
+        await storage.set(DEMO_KEY, list.filter((a) => a.id !== user.id));
+        await storage.remove(DEMO_SESSION); setUser(null); return {};
       },
       async signOut() {
         if (supabase) await supabase.auth.signOut();

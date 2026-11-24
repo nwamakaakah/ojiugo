@@ -85,6 +85,8 @@ export function resolveColors(season: Season, appearance: Appearance) {
     softInteractiveLabel: pick(p['800'], p['200']),
     softNeutralFill: pick(sf['200'], sf['700']),
     softWonderFill: pick(primitives.plum['100'], primitives.plum['800']),
+    toastWarm: pick(primitives.terracotta['200'], primitives.terracotta['200']),
+    toastWarmLabel: pick(primitives.terracotta['900'], primitives.terracotta['900']),
     navGlassFill: pick(s.surface === 'sand' ? 'rgba(253,250,241,0.7)' : 'rgba(251,251,243,0.7)', s.surface === 'sand' ? 'rgba(39,34,27,0.62)' : 'rgba(37,36,29,0.62)'),
     navGlassTint: rgba(s.tint, 0.06),
     overlayScrim: rgba(s.overlay, d ? 0.54 : 0.72),

@@ -12,7 +12,7 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const d = post.data;
 ---
-<Base title={d.title} description={d.summary} header="back" backHref="/" backLabel="back to birdie blog">
+<Base title={d.title} description={d.summary} header="back" backHref="/blog" backLabel="back to birdie blog">
   <section class="section top">
     <div class="read head">
       <h1>{d.title}</h1>
@@ -43,7 +43,7 @@ const d = post.data;
   .prose :global(h2) { font-weight: 600; font-size: 22px; line-height: 30px; margin-bottom: -32px; }
   .prose :global(blockquote) { margin: 0; padding: 12px 24px; background: var(--soft-wonder-fill); border-left: 2px solid var(--icon-wonder); }
   .prose :global(blockquote p) { color: var(--text-default); }
-  @media (max-width: 760px) {
+  @media (max-width: 1024px) {
     .top { padding-top: 130px; }
     h1 { font-size: 32px; line-height: 40px; }
     .top :global(.hero-img) { height: auto; aspect-ratio: 700 / 595; }

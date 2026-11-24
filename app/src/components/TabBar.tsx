@@ -8,8 +8,8 @@ import { T } from './ui';
 
 const TABS = [
   { key: 'entries', label: 'entries', href: '/entries' },
-  { key: 'flocks', label: 'flocks', href: '/entries' },
   { key: 'add', label: '', href: '/entries' },
+  { key: 'flocks', label: 'flocks', href: '/entries' },
   { key: 'calls', label: 'calls', href: '/entries' },
   { key: 'me', label: 'me', href: '/me' },
 ] as const;
