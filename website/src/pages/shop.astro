@@ -101,7 +101,8 @@ const icons = {
     sorted.forEach((el) => list.appendChild(el));
     empty.hidden = n > 0;
   };
-  search.addEventListener('input', apply); cat.addEventListener('change', apply); sort.addEventListener('change', apply);
+  // these controls only exist once the shop is open (COMING_SOON = false)
+  search?.addEventListener('input', apply); cat?.addEventListener('change', apply); sort?.addEventListener('change', apply);
   // The shop isn't taking orders yet — buttons acknowledge the tap instead of failing silently.
   const note = document.querySelector<HTMLElement>('[data-note]')!;
   document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((b) => b.addEventListener('click', () => {

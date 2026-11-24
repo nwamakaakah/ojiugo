@@ -80,3 +80,19 @@ h1 .w, h2 .w { padding-bottom: .06em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; transition: none !important; }
 }
+
+/* foliage sways gently in the wind — it stays attached to its background, no parallax.
+   Uses the separate `rotate` property so it layers on top of each piece's own transform. */
+@keyframes oj-wind { 0%, 100% { rotate: -1.6deg; } 50% { rotate: 1.6deg; } }
+@keyframes oj-wind-soft { 0%, 100% { rotate: -1deg; } 50% { rotate: 1deg; } }
+.motion-on :is(.branch-left, .twig-l) { transform-origin: 0% 10%; animation: oj-wind 5.5s ease-in-out infinite; }
+.motion-on :is(.branch-right, .twig-in) { transform-origin: 100% 15%; animation: oj-wind 6.2s ease-in-out -1.8s infinite; }
+.motion-on :is(.grass-left, .grass-right) { transform-origin: 50% 100%; animation: oj-wind 3.8s ease-in-out infinite; }
+.motion-on .grass-right { animation-delay: -1.3s; }
+.motion-on .soon .nest { transform-origin: 50% 90%; animation: oj-wind-soft 4.6s ease-in-out infinite; }
+
+/* taps on phones: no grey/blue highlight box — the press itself (sink + feathers) is the feedback.
+   Keyboard users still get a clear focus ring. */
+html { -webkit-tap-highlight-color: transparent; }
+a, button, [role='button'], input, select, label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+:focus:not(:focus-visible) { outline: none; }

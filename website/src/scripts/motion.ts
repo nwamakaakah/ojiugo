@@ -92,16 +92,13 @@ if (reduce) {
   });
 
   /* ---------- below the first screen: just parallax ---------- */
-  // text drifts a little slower than the page; decorations drift at their own pace for depth.
+  // text drifts a little slower than the page. Foliage and illustrations stay fixed to their backgrounds.
   // App previews stay still (they only tilt on hover — see motion.css).
   const drift = (els: HTMLElement[], from: number, to: number) => els.forEach((el) =>
     gsap.fromTo(el, { y: from }, { y: to, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 0.8 } }));
   const later = (sel: string) => $(`main section:not(:first-of-type) :is(${sel})`);
   drift(later('h2, .t-overline').filter((el) => !el.closest('.card, .soon')), 40, -40);
   drift(later('.t-body-lg, .t-body-md').filter((el) => !el.closest('.card, .soon, .row, .top')), 25, -25);
-  drift($('.cta .branch-left, .cta .branch-right'), -50, 50);
-  drift($('.cta .grass-left, .cta .grass-right'), 30, -10);
-  drift($('.soon .nest, .soon-art, .leaf, .deco'), 60, -60);
 
   /* ---------- buttons burst into feathers (and chirp) when pressed ---------- */
   const FEATHER = '<svg viewBox="0 0 24 24"><path class="vane" d="M19 3C11 4 6 9 5 17l2 1c6-1 11-6 12-15Z"/><path class="rachis" d="M4 21 16 7"/></svg>';
@@ -118,7 +115,7 @@ if (reduce) {
         .to(f, { y: `+=${rand(90, 170)}`, x: `+=${rand(-40, 40)}`, rotate: `+=${rand(-120, 120)}`, opacity: 0, duration: rand(0.9, 1.4), ease: 'sine.in' });
     }
   };
-  const PRESSABLE = '.btn, .get, .badge, .cta-btn, .add, button';
+  const PRESSABLE = '.btn, .get, .badge, .cta-btn, .add, button, .pill, .site-header a, .menu-links a, footer a';
   document.addEventListener('click', (e) => {
     const el = (e.target as Element).closest<HTMLElement>(PRESSABLE); if (!el) return;
     const r = el.getBoundingClientRect();

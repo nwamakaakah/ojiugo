@@ -21,7 +21,7 @@ const features = [
         <StoreBadges />
       </div>
       <div class="hero-art">
-        <img class="hero-img" src="/images/app/hero-phone.webp" width="1014" height="1188" fetchpriority="high" alt="The ọjịugo app showing a diary page for a Sunbird: a photo of the bird on a branch, the time and place it was seen, and the feelings joyful and singing" />
+        <img class="hero-img" src="/images/app/hero-phone.webp" width="1014" height="1878" fetchpriority="high" alt="The ọjịugo app showing a diary page for a Sunbird: a photo of the bird on a branch, the time and place it was seen, and the feelings joyful and singing" />
       </div>
     </div>
   </section>
@@ -104,7 +104,8 @@ const features = [
   .lede { max-width: 590px; }
   .hero-text :global(.badges) { margin-top: 24px; }
   .hero-art { position: relative; height: 710px; }
-  .hero-img { position: absolute; bottom: 0; left: -10px; width: 470px; max-width: none; height: auto; }
+  /* the full phone is taller than the hero — the section edge crops it, so tilting never shows a cut side */
+  .hero-img { position: absolute; top: 160px; left: -10px; width: 470px; max-width: none; height: auto; }
   .twig { position: absolute; pointer-events: none; }
   .twig-l { left: -40px; top: 300px; width: 120px; transform: scaleX(-1) rotate(70deg); z-index: 2; opacity: .95; }
   .twig-in { right: -40px; top: -10px; width: 190px; z-index: 0; }
@@ -175,8 +176,8 @@ const features = [
   @media (max-width: 1024px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-text { padding-top: 0; padding-bottom: 0; }
-    .hero-art { height: 480px; width: 100%; max-width: 410px; margin-inline: auto; }
-    .hero-img { width: 100%; left: 0; }
+    .hero-art { height: 480px; width: 100%; max-width: 410px; margin-inline: auto; overflow: hidden; }
+    .hero-img { width: 100%; left: 0; top: 0; }
     .cards { grid-template-columns: 1fr; }
     .card .art { height: 300px; }
     .shot { width: 300px; }
@@ -190,8 +191,8 @@ const features = [
     .hero { padding-top: 130px; }
     h1 { font-size: 40px; line-height: 48px; }
     .hero-text :global(.badges) { margin-top: 16px; }
-    .hero-art { height: auto; aspect-ratio: 1014 / 1188; margin: 32px auto 0; width: 100%; max-width: 340px; }
-    .hero-img { width: 100%; left: 0; }
+    .hero-art { height: auto; aspect-ratio: 1014 / 1188; margin: 32px auto 0; width: 100%; max-width: 340px; overflow: hidden; }
+    .hero-img { width: 100%; left: 0; top: 0; }
     .page { min-height: 420px; }
     .twig-l { display: none; }
     .remember, .features { padding-top: 100px; padding-bottom: 100px; }
