@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+---
+<Base title="join our waitlist" header="back" backHref="/" backLabel="back" footer="mini">
+  <section class="section intro">
+    <div class="intro-text">
+      <p class="t-overline">BE THE FIRST TO KNOW</p>
+      <h1>join our waitlist</h1>
+      <p class="t-body-lg lede">a growing diary of the birds i've found around Nigeria — photos, calls, and a few notes from the field</p>
+    </div>
+  </section>
+  <section class="section form-wrap">
+    <form class="form" data-waitlist novalidate>
+      <label class="field">
+        <span class="t-label">YOUR EMAIL</span>
+        <input class="input" id="waitlist-email" name="email" type="email" autocomplete="email" required aria-describedby="waitlist-msg" />
+        <span class="t-body-sm msg" id="waitlist-msg" role="alert"></span>
+      </label>
+      <button class="btn t-button" type="submit">join waitlist <Arrow /></button>
+    </form>
+  </section>
+</Base>
+
+<script>
+  // TODO: send the email to your waitlist provider (Formspree, Supabase…) before redirecting.
+  const form = document.querySelector<HTMLFormElement>('[data-waitlist]')!;
+  const input = form.querySelector<HTMLInputElement>('input')!;
+  const msg = form.querySelector<HTMLElement>('.msg')!;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!input.value || !input.checkValidity()) { msg.textContent = 'that email doesn’t look quite right'; input.setAttribute('aria-invalid', 'true'); input.focus(); return; }
+    window.location.href = '/waitlist/success';
+  });
+  input.addEventListener('input', () => { msg.textContent = ''; input.removeAttribute('aria-invalid'); });
+</script>
+
+<style>
+  .intro { padding-top: 200px; display: flex; justify-content: center; }
+  .intro-text { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  h1 { font-weight: 600; font-size: clamp(40px, 5vw, 64px); line-height: 1.094; max-width: 615px; }
+  .lede { max-width: 590px; }
+  .form-wrap { padding-top: 100px; padding-bottom: 100px; }
+  .form { width: 100%; max-width: 626px; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+  .form .btn { width: 100%; }
+  .msg { min-height: 0; color: #9a4a2c; padding-left: 24px; }
+  .msg:empty { display: none; }
+  .input[aria-invalid='true'] { border-color: #b6683f; }
+  @media (max-width: 760px) {
+    .intro { padding-top: 150px; }
+    h1 { font-size: 40px; line-height: 48px; }
+    .form-wrap { padding-top: 64px; padding-bottom: 64px; }
+    .form { gap: 32px; }
+  }
+</style>

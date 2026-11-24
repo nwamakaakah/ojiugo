@@ -1,0 +1,31 @@
+---
+// Reproduces the Figma image framing: an oversized photo positioned inside a clipped wrapper.
+import fs from 'node:fs';
+import path from 'node:path';
+type Crop = [number, number, number] | undefined;
+interface Props { src?: string; alt?: string; crop?: Crop; cropMobile?: Crop; class?: string; eager?: boolean; }
+const { src, alt = '', crop, cropMobile, class: cls, eager = false } = Astro.props;
+const exists = !!src && fs.existsSync(path.join(process.cwd(), 'public', src));
+const c = crop ?? [0, 0, 0];
+const m = cropMobile ?? c;
+const style = crop
+  ? `--w:${c[0]}px;--l:${c[1]}px;--t:${c[2]}px;--mw:${m[0]}px;--ml:${m[1]}px;--mt:${m[2]}px`
+  : '';
+---
+<div class:list={['crop', cls, { fit: !crop }]} style={style}>
+  {exists
+    ? <img src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" />
+    : <div class="crop-ph" role={alt ? 'img' : undefined} aria-label={alt || undefined}><span class="pen"><img src="/icons/pen.svg" alt="" /></span></div>}
+</div>
+
+<style>
+  .crop { position: relative; overflow: hidden; background: var(--bg-desk); }
+  .crop > img { position: absolute; max-width: none; width: var(--w); min-width: 100%; height: auto; left: calc(50% + var(--l)); top: var(--t); transform: translateX(-50%); }
+  .crop.fit > img { position: static; width: 100%; height: 100%; object-fit: cover; transform: none; }
+  .crop-ph { width: 100%; height: 100%; display: grid; place-items: center; background: var(--soft-wonder-fill); }
+  .pen { display: flex; padding: 24px; border-radius: 1998px; background: var(--soft-wonder-fill); }
+  .pen img { width: 44.93px; height: 48px; }
+  @media (max-width: 760px) {
+    .crop > img { width: var(--mw); left: calc(50% + var(--ml)); top: var(--mt); }
+  }
+</style>

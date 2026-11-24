@@ -1,0 +1,107 @@
+---
+interface Props { variant?: 'nav' | 'back' | 'none'; backHref?: string; backLabel?: string; }
+const { variant = 'nav', backHref = '/', backLabel = 'back' } = Astro.props;
+const path = Astro.url.pathname;
+const onFieldlog = path.startsWith('/fieldlog');
+---
+{variant !== 'none' && (
+<header class="site-header">
+  <div class="bar">
+    {variant === 'back' ? (
+      <a class="pill back t-button" href={backHref}>
+        <span class="back-icon"><img src="/icons/back.svg" alt="" width="18" height="9" /></span>
+        {backLabel}
+      </a>
+    ) : (
+      <>
+        <a class="pill brand" href="/" aria-label="ọjịugo home">
+          <img class="logo" src="/illustrations/logo-nav.svg" alt="" width="47" height="39" />
+          <span class="word">ọjịugo</span>
+        </a>
+        <nav class="pill links" aria-label="Main">
+          <a class="t-button" href="/fieldlog" aria-current={onFieldlog ? 'page' : undefined}>my fieldlog</a>
+          <a class="t-button" href="/" aria-current={!onFieldlog ? 'page' : undefined}>birdie blog</a>
+        </nav>
+        <button class="pill menu-btn" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+          <img src="/icons/hamburger.svg" alt="" width="29" height="16" />
+        </button>
+      </>
+    )}
+  </div>
+</header>
+)}
+
+{variant === 'nav' && (
+  <div class="mobile-menu" id="mobile-menu" hidden>
+    <div class="bar">
+      <a class="pill brand" href="/" aria-label="ọjịugo home">
+        <img class="logo" src="/illustrations/logo-nav.svg" alt="" width="47" height="39" />
+        <span class="word">ọjịugo</span>
+      </a>
+      <button class="pill menu-close" type="button" aria-label="Close menu">
+        <img src="/icons/close.svg" alt="" width="24" height="24" />
+      </button>
+    </div>
+    <nav class="menu-links" aria-label="Mobile">
+      <a href="/fieldlog">fieldlog</a>
+      <a href="/">birdie blog</a>
+      <a class="btn t-button" href="/waitlist">join our waitlist <span class="icon"><img src="/icons/arrow.svg" alt="" /></span></a>
+    </nav>
+  </div>
+)}
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('.menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const close = document.querySelector<HTMLButtonElement>('.menu-close');
+  const set = (open: boolean) => {
+    if (!btn || !menu) return;
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : '';
+    (open ? close : btn)?.focus();
+  };
+  btn?.addEventListener('click', () => set(true));
+  close?.addEventListener('click', () => set(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && menu && !menu.hidden) set(false); });
+</script>
+
+<style>
+  .site-header { position: fixed; top: 59px; left: 0; right: 0; z-index: 50; padding: 0 var(--gutter); pointer-events: none; }
+  .bar { max-width: var(--content); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .bar > * { pointer-events: auto; }
+  .brand { gap: 4.86px; }
+  .brand .logo { width: 46.1px; height: 38.9px; }
+  .word { font-weight: 600; font-size: 17.02px; line-height: 19.45px; letter-spacing: 0.24px; color: var(--text-default); }
+  .links { gap: 24px; }
+  .links a { position: relative; color: var(--text-light); transition: color .2s ease; }
+  .links a:hover { color: var(--text-interactive); }
+  .links a[aria-current='page'] { color: var(--text-default); font-weight: 600; }
+  .links a[aria-current='page']::after {
+    content: ''; position: absolute; left: 50%; bottom: -8px; width: 5px; height: 5px;
+    border-radius: 50%; background: var(--action-primary); transform: translateX(-50%);
+  }
+  .back { gap: 8px; color: var(--text-default); }
+  .back-icon { display: flex; padding: 4px 0; transform: rotate(180deg); }
+  .back-icon img { width: 17.81px; height: 7.7px; }
+  .menu-btn, .menu-close { display: none; border: 0; cursor: pointer; height: 55px; }
+
+  .mobile-menu { position: fixed; inset: 0; z-index: 60; background: var(--bg-app); }
+  .mobile-menu[hidden] { display: none; }
+  .mobile-menu .bar { position: absolute; top: 25px; left: var(--gutter); right: var(--gutter); max-width: none; }
+  .menu-close img { transform: rotate(-45deg); width: 24px; height: 24px; }
+  .menu-links { display: flex; flex-direction: column; gap: 48px; padding: 150px var(--gutter) 0; }
+  .menu-links > a:not(.btn) { padding: 8px 12px; font-weight: 500; font-size: 24px; line-height: 32px; color: var(--text-light); }
+  .menu-links .btn { width: 100%; }
+
+  @media (max-width: 760px) {
+    .site-header { top: 25px; }
+    .bar { max-width: none; }
+    .links { display: none; }
+    .menu-btn, .menu-close { display: inline-flex; }
+    .brand .logo { width: 32.57px; height: 27.48px; }
+    .brand { gap: 3.44px; }
+    .word { font-size: 12.02px; line-height: 13.74px; letter-spacing: 0.17px; }
+    .menu-btn img { width: 29.4px; height: 16.3px; }
+  }
+</style>

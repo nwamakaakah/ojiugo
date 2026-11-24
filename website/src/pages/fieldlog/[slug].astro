@@ -1,0 +1,143 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { longDate } from '../../utils';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('fieldlog');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const inPublic = (p?: string) => !!p && fs.existsSync(path.join(process.cwd(), 'public', p));
+const real = d.photos.filter((p) => inPublic(p.src));
+const slides = real.length ? real : [{ src: '', label: d.photos[0]?.label, alt: d.name }];
+const dots = Math.max(slides.length, 1);
+const sounds = d.sounds.map((s) => ({ ...s, playable: inPublic(s.src) }));
+---
+<Base title={d.name} header="back" backHref="/fieldlog" backLabel="back to fieldlog">
+  <section class="section top">
+    <div class="read hero">
+      <div class="frame" data-carousel>
+        {slides.map((s, i) => (
+          <figure class="slide" data-slide data-label={s.label ?? ''} hidden={i !== 0}>
+            {s.src
+              ? <img src={s.src} alt={s.alt ?? d.name} loading={i === 0 ? 'eager' : 'lazy'} />
+              : <div class="ph"><span class="pen"><img src="/icons/pen.svg" alt="" /></span></div>}
+          </figure>
+        ))}
+      </div>
+      <div class="arrows">
+        <button class="pill arrow-pill" type="button" data-prev aria-label="previous photo"><span class="flip"><img src="/icons/back.svg" alt="" /></span></button>
+        <p class="t-body-sm caption" data-caption aria-live="polite">{slides[0].label}</p>
+        <button class="pill arrow-pill" type="button" data-next aria-label="next photo"><span><img src="/icons/back.svg" alt="" /></span></button>
+      </div>
+      <div class="dots" aria-hidden="true">
+        {Array.from({ length: dots }).map((_, i) => <span class:list={['dotx', { on: i === 0 }]} data-dot></span>)}
+      </div>
+    </div>
+    <div class="read names">
+      <h1>{d.name}</h1>
+      <p class="t-body-lg">{d.scientific}</p>
+    </div>
+  </section>
+
+  <section class="section body">
+    <div class="read content">
+      <div class="note">
+        <h2>my little note</h2>
+        <div class="t-body-lg"><Content /></div>
+      </div>
+
+      {sounds.length > 0 && (
+        <div class="sounds">
+          <p class="t-overline">SONGS &amp; CALLS</p>
+          {sounds.map((s) => (
+            <div class="sound">
+              <button class="play" type="button" data-play disabled={!s.playable} aria-label={s.playable ? `play ${s.label}` : `${s.label} — recording coming soon`}>
+                <img src="/icons/play.svg" alt="" />
+              </button>
+              <span class="t-label sound-label">{s.label}</span>
+              <span class="t-caption">{s.duration}</span>
+              {s.playable && <audio preload="none" src={s.src}></audio>}
+            </div>
+          ))}
+          <div class="meta-row t-caption"><span>recordings by me</span><img class="dot" src="/icons/dot.svg" alt="" /><span>songs &amp; calls vary by region</span></div>
+        </div>
+      )}
+
+      <div class="details">
+        <div class="col">
+          <div class="item"><p class="t-overline">seen</p><div class="meta-row t-label"><span>{longDate(d.seen)}</span>{d.time && <><img class="dot" src="/icons/dot.svg" alt="" /><span>{d.time}</span></>}</div></div>
+          {d.coordinates && <div class="item"><p class="t-overline">coordinates</p><p class="t-label">{d.coordinates}</p></div>}
+        </div>
+        <div class="col">
+          <div class="item"><p class="t-overline">place</p><p class="t-label">{d.placeDetail ?? d.place}</p></div>
+          <div class="item"><p class="t-overline">state</p><p class="t-label">{d.state}</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const slides = [...document.querySelectorAll<HTMLElement>('[data-slide]')];
+  const dots = [...document.querySelectorAll<HTMLElement>('[data-dot]')];
+  const cap = document.querySelector<HTMLElement>('[data-caption]')!;
+  let i = 0;
+  const go = (n: number) => {
+    i = (n + slides.length) % slides.length;
+    slides.forEach((s, k) => (s.hidden = k !== i));
+    dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    cap.textContent = slides[i].dataset.label ?? '';
+  };
+  document.querySelector('[data-prev]')?.addEventListener('click', () => go(i - 1));
+  document.querySelector('[data-next]')?.addEventListener('click', () => go(i + 1));
+  document.querySelectorAll<HTMLElement>('.sound').forEach((row) => {
+    const audio = row.querySelector('audio'); const btn = row.querySelector('[data-play]');
+    if (!audio || !btn) return;
+    btn.addEventListener('click', () => { if (audio.paused) { document.querySelectorAll('audio').forEach((a) => a !== audio && a.pause()); audio.play(); } else audio.pause(); });
+  });
+</script>
+
+<style>
+  .top { padding-top: 200px; display: flex; flex-direction: column; gap: 24px; }
+  .hero { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .frame { width: 100%; height: 358px; border-radius: var(--radius-media); overflow: hidden; background: var(--bg-desk); }
+  .slide { margin: 0; width: 100%; height: 100%; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  .ph { width: 100%; height: 100%; display: grid; place-items: center; background: var(--soft-wonder-fill); }
+  .pen { display: flex; padding: 24px; border-radius: 1998px; }
+  .pen img { width: 44.93px; height: 48px; }
+  .arrows { width: 100%; display: flex; align-items: center; gap: 12px; }
+  .arrow-pill { height: 40px; border: 0; cursor: pointer; }
+  .arrow-pill span { display: flex; padding: 4px 0; }
+  .arrow-pill .flip { transform: rotate(180deg); }
+  .arrow-pill img { width: 17.81px; height: 7.7px; }
+  .caption { flex: 1; text-align: center; }
+  .dots { display: flex; gap: 2px; align-items: center; }
+  .dotx { width: 6px; height: 6px; border-radius: 9999px; background: var(--action-primary); opacity: .4; transition: width .2s ease; }
+  .dotx.on { width: 26px; opacity: 1; }
+  .names { display: flex; flex-direction: column; gap: 8px; }
+  h1 { font-weight: 600; font-size: 32px; line-height: 40px; }
+  .body { padding-top: 32px; padding-bottom: 100px; }
+  .content { display: flex; flex-direction: column; gap: 48px; }
+  .note { display: flex; flex-direction: column; gap: 16px; }
+  h2 { font-weight: 600; font-size: 22px; line-height: 30px; }
+  .sounds { display: flex; flex-direction: column; gap: 12px; }
+  .sound { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-lg); background: var(--surface-page); }
+  .play { width: 32px; height: 32px; padding: 0; border: 0; background: none; cursor: pointer; flex: none; }
+  .play:disabled { cursor: default; }
+  .play img { width: 32px; height: 32px; }
+  .sound-label { flex: 1; }
+  .details { display: flex; gap: 24px; }
+  .col { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+  .item { display: flex; flex-direction: column; gap: 12px; }
+  @media (max-width: 760px) {
+    .top { padding-top: 130px; }
+    .frame { height: auto; aspect-ratio: 700 / 358; }
+  }
+</style>

@@ -1,0 +1,51 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CropImage from '../../components/CropImage.astro';
+import { shortDate } from '../../utils';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+---
+<Base title={d.title} description={d.summary} header="back" backHref="/" backLabel="back to birdie blog">
+  <section class="section top">
+    <div class="read head">
+      <h1>{d.title}</h1>
+      <p class="t-body-lg">{d.intro ?? d.summary}</p>
+      <div class="meta-row t-caption">
+        <span>{d.author}</span><img class="dot" src="/icons/dot.svg" alt="" />
+        <span>{shortDate(d.date)}</span>
+        {d.readingTime && <><img class="dot" src="/icons/dot.svg" alt="" /><span>{d.readingTime}</span></>}
+      </div>
+    </div>
+    <div class="read">
+      <CropImage class="hero-img" src={d.image} alt={d.imageAlt} crop={d.cropHero} eager />
+    </div>
+  </section>
+  <section class="section body">
+    <article class="read prose"><Content /></article>
+  </section>
+</Base>
+
+<style>
+  .top { padding-top: 200px; display: flex; flex-direction: column; gap: 24px; }
+  .head { display: flex; flex-direction: column; gap: 16px; }
+  h1 { font-weight: 600; font-size: 40px; line-height: 48px; }
+  .top :global(.hero-img) { height: 595px; border-radius: var(--radius-media); }
+  .body { padding-top: 32px; padding-bottom: 100px; }
+  .prose { display: flex; flex-direction: column; gap: 48px; }
+  .prose :global(p) { font-size: 16px; line-height: 26px; color: var(--text-subtle); }
+  .prose :global(h2) { font-weight: 600; font-size: 22px; line-height: 30px; margin-bottom: -32px; }
+  .prose :global(blockquote) { margin: 0; padding: 12px 24px; background: var(--soft-wonder-fill); border-left: 2px solid var(--icon-wonder); }
+  .prose :global(blockquote p) { color: var(--text-default); }
+  @media (max-width: 760px) {
+    .top { padding-top: 130px; }
+    h1 { font-size: 32px; line-height: 40px; }
+    .top :global(.hero-img) { height: auto; aspect-ratio: 700 / 595; }
+  }
+</style>

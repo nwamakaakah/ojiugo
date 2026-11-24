@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "ọjịugo",
+    "slug": "ojiugo",
+    "scheme": "ojiugo",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.ojiugo.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.ojiugo.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F2E6",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "asyncRoutes": false
+        }
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7F2E6",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 160
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": false
+      },
+      "eas": {
+        "projectId": "0f0b250c-a229-4985-8481-a598bfb52af4"
+      }
+    },
+    "owner": "nwamaka"
+  }
+}

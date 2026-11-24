@@ -1,0 +1,49 @@
+---
+import Arrow from './Arrow.astro';
+interface Props { id: string; }
+const { id } = Astro.props;
+---
+<div class="nl">
+  <div class="nl-text">
+    <p class="nl-title">a letter now and then</p>
+    <p class="t-body-md nl-copy">one cosy email a month — a bird to notice, a story, a new journal entry. no spam, ever</p>
+  </div>
+  <form class="nl-form" data-newsletter novalidate>
+    <label class="field nl-field">
+      <span class="t-label">YOUR EMAIL</span>
+      <input class="input" id={id} name="email" type="email" autocomplete="email" required />
+    </label>
+    <button class="btn t-button nl-btn" type="submit">get notified <Arrow /></button>
+  </form>
+  <p class="t-body-sm nl-msg" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+  // TODO: connect to your email provider (Buttondown, ConvertKit, Mailchimp…).
+  document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
+    const msg = form.parentElement!.querySelector<HTMLElement>('.nl-msg')!;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.querySelector<HTMLInputElement>('input')!;
+      if (!input.value || !input.checkValidity()) { msg.textContent = 'that email doesn’t look quite right'; msg.dataset.state = 'error'; input.focus(); return; }
+      msg.textContent = 'lovely — your first letter is on its way soon.'; msg.dataset.state = 'ok'; form.reset();
+    });
+  });
+</script>
+
+<style>
+  .nl { display: flex; flex-direction: column; gap: 32px; }
+  .nl-text { display: flex; flex-direction: column; gap: 8px; max-width: 590px; }
+  .nl-title { font-weight: 600; font-size: 20px; line-height: 26px; letter-spacing: 0.2px; color: var(--text-default); }
+  .nl-form { display: flex; gap: 16px; align-items: flex-end; }
+  .nl-field { width: 423px; }
+  .nl-btn { width: 233px; }
+  .nl-msg { margin-top: -20px; min-height: 20px; color: var(--text-interactive); }
+  .nl-msg[data-state='error'] { color: #9a4a2c; }
+  @media (max-width: 760px) {
+    .nl { gap: 32px; }
+    .nl-title { font-size: 16px; }
+    .nl-form { flex-direction: column; align-items: stretch; }
+    .nl-field, .nl-btn { width: 100%; }
+  }
+</style>

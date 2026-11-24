@@ -1,0 +1,114 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import CropImage from '../../components/CropImage.astro';
+import { shortDate } from '../../utils';
+
+const entries = (await getCollection('fieldlog')).sort((a, b) => b.data.seen.valueOf() - a.data.seen.valueOf());
+const states = [...new Set(entries.map((e) => e.data.state))].sort();
+---
+<Base title="my fieldlog">
+  <section class="section intro">
+    <div class="intro-text">
+      <p class="t-overline">My nigeria field log</p>
+      <h1>birds i've met</h1>
+      <p class="t-body-lg lede">a growing diary of the birds i've found around Nigeria — photos, calls, and a few notes from the field</p>
+    </div>
+  </section>
+
+  <section class="section list">
+    <div class="inner list-inner">
+      <form class="inputs" role="search" onsubmit="return false">
+        <label class="search">
+          <span class="sr-only">search birds</span>
+          <img class="search-icon" src="/icons/search.svg" alt="" />
+          <input type="search" placeholder="search..." data-search autocomplete="off" />
+        </label>
+        <label class="select">
+          <span class="sr-only">filter by place</span>
+          <select data-place>
+            <option value="">all places</option>
+            {states.map((s) => <option value={s}>{s}</option>)}
+          </select>
+          <img class="chev" src="/icons/chevron.svg" alt="" />
+        </label>
+      </form>
+
+      <ul class="items">
+        {entries.map((e) => (
+          <li class="card" data-entry data-state={e.data.state} data-text={`${e.data.name} ${e.data.scientific} ${e.data.place} ${e.data.state}`.toLowerCase()}>
+            <CropImage class="card-img" src={e.data.photos[0]?.src} alt={e.data.name} />
+            <div class="card-text">
+              <div class="names">
+                <h2>{e.data.name}</h2>
+                <p class="t-body-md">{e.data.scientific}</p>
+              </div>
+              <div class="meta-row t-ui">
+                <span>{shortDate(e.data.seen)}</span><img class="dot" src="/icons/dot.svg" alt="" /><span>{e.data.place}</span>
+              </div>
+              <a class="btn t-button card-btn" href={`/fieldlog/${e.id}`}>read all about it<span class="sr-only"> — {e.data.name}</span></a>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="t-body-md empty" data-empty hidden>no birds match that yet — maybe tomorrow’s walk?</p>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<script>
+  const search = document.querySelector<HTMLInputElement>('[data-search]')!;
+  const place = document.querySelector<HTMLSelectElement>('[data-place]')!;
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-entry]')];
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const apply = () => {
+    const q = search.value.trim().toLowerCase(); const p = place.value; let n = 0;
+    cards.forEach((c) => { const ok = (!q || c.dataset.text!.includes(q)) && (!p || c.dataset.state === p); c.hidden = !ok; if (ok) n++; });
+    empty.hidden = n > 0;
+  };
+  search.addEventListener('input', apply); place.addEventListener('change', apply);
+</script>
+
+<style>
+  .intro { padding-top: 200px; display: flex; justify-content: center; }
+  .intro-text { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  h1 { font-weight: 600; font-size: clamp(40px, 5vw, 64px); line-height: 1.094; max-width: 615px; }
+  .lede { max-width: 590px; }
+  .list { padding-top: 100px; padding-bottom: 100px; }
+  .list-inner { display: flex; flex-direction: column; gap: 64px; }
+  .inputs { display: flex; gap: 16px; }
+  .search, .select { display: flex; align-items: center; gap: 12px; height: 64px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); }
+  .search { flex: 1; padding: 4px 16px 8px; }
+  .search-icon { width: 25.85px; height: 24px; }
+  .search input { flex: 1; min-width: 0; border: 0; background: transparent; font-size: 15px; line-height: 24px; color: var(--text-default); }
+  .search input::placeholder { color: var(--text-disabled); }
+  .search input:focus { outline: none; }
+  .search:focus-within, .select:focus-within { border-color: var(--action-primary); }
+  .select { position: relative; background: var(--surface-page); padding: 4px 24px 8px; }
+  .select select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; font-size: 15px; line-height: 24px; color: var(--text-subtle); padding-right: 32px; cursor: pointer; }
+  .select select:focus { outline: none; }
+  .chev { position: absolute; right: 24px; width: 20px; height: 10px; pointer-events: none; }
+  .items { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .card { display: flex; flex-direction: column; background: var(--surface-page); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-sm); }
+  .card[hidden] { display: none; }
+  .card :global(.card-img) { height: 192px; }
+  .card-text { display: flex; flex-direction: column; gap: 24px; padding: 24px; }
+  .names { display: flex; flex-direction: column; gap: 4px; }
+  h2 { font-weight: 600; font-size: 16px; line-height: 26px; }
+  .card-btn { height: 40px; width: 100%; padding: 16px; }
+  .empty { text-align: center; }
+  @media (max-width: 960px) { .items { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 760px) {
+    .intro { padding-top: 150px; }
+    h1 { font-size: 40px; line-height: 48px; }
+    .list { padding-top: 64px; padding-bottom: 64px; }
+    .list-inner { gap: 32px; }
+    .inputs { flex-direction: column; }
+    .search, .select { flex: none; }
+    .select select { width: 100%; }
+    .items { grid-template-columns: 1fr; }
+  }
+</style>

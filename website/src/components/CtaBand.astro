@@ -1,0 +1,43 @@
+---
+import Arrow from './Arrow.astro';
+---
+<section class="section cta" aria-labelledby="cta-title">
+  <img class="art branch-left" src="/illustrations/branch-left.svg" alt="" width="274" height="204" />
+  <img class="art branch-right" src="/illustrations/branch-right.svg" alt="" width="216" height="161" />
+  <img class="art grass-left" src="/illustrations/grass-left.svg" alt="" width="80" height="111" />
+  <img class="art grass-right" src="/illustrations/grass-right.svg" alt="" width="79" height="119" />
+  <div class="inner cta-inner">
+    <div class="cta-text">
+      <p class="t-overline"><span class="d">it's free to start</span><span class="m">it's free — no catch</span></p>
+      <h2 id="cta-title">begin your diary today</h2>
+      <p class="t-body-lg sub"><span class="d">Your first bird is waiting</span><span class="m">your first sighting is waiting outside</span></p>
+    </div>
+    <a class="btn t-button cta-btn" href="/waitlist">join our waitlist <Arrow /></a>
+  </div>
+</section>
+
+<style>
+  .cta { position: relative; overflow: hidden; background: var(--nav-glass-fill); padding-top: 150px; padding-bottom: 150px; }
+  .cta-inner { position: relative; display: flex; align-items: center; gap: 100px; }
+  .cta-text { flex: 1; display: flex; flex-direction: column; gap: 24px; }
+  h2 { font-weight: 600; font-size: clamp(32px, 3.75vw, 48px); line-height: 1.167; }
+  .cta-btn { padding: 16px 48px; }
+  .art { position: absolute; pointer-events: none; max-width: none; }
+  .branch-left { left: 0; top: 0; width: 274px; height: 204px; }
+  .branch-right { right: 0; top: 37px; width: 216px; height: 161px; }
+  .grass-left { left: 2.73%; bottom: 0; width: 80px; height: 111px; }
+  .grass-right { right: 3.62%; bottom: 0; width: 79px; height: 119px; }
+  .m { display: none; }
+  @media (max-width: 760px) {
+    .cta { background: var(--surface-page); padding-top: 100px; padding-bottom: 100px; }
+    .cta-inner { flex-direction: column; align-items: stretch; gap: 48px; }
+    h2 { font-size: 32px; line-height: 40px; }
+    .sub { font-size: 15px; line-height: 24px; }
+    .cta-btn { width: 100%; padding: 16px 12px; }
+    .branch-left { width: 204px; height: 152px; }
+    .branch-right { width: 161px; height: 120px; top: 1px; }
+    .grass-left { left: 2.29%; width: 60px; height: 83px; }
+    .grass-right { right: 2.66%; width: 59px; height: 89px; }
+    .d { display: none; } .m { display: inline; }
+  }
+</style>

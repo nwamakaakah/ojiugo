@@ -1,0 +1,59 @@
+---
+import Newsletter from './Newsletter.astro';
+interface Props { variant?: 'full' | 'mini'; }
+const { variant = 'full' } = Astro.props;
+---
+<footer>
+  {variant === 'full' && (
+    <section class="section foot">
+      <div class="inner foot-inner">
+        <div class="foot-main">
+          <a class="foot-logo" href="/" aria-label="ọjịugo home">
+            <img src="/illustrations/logo-tile.svg" alt="" width="58" height="49" />
+            <span>ọjịugo</span>
+          </a>
+          <Newsletter id="footer-email" />
+        </div>
+        <div class="foot-links">
+          <p class="t-overline">Resources</p>
+          <ul class="t-button">
+            <li><a href="/">blog</a></li>
+            <li><a href="mailto:hello@ojiugo.com">contact us</a></li>
+            <li><a href="/privacy">privacy policy</a></li>
+            <li><a href="/terms">terms of use</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  )}
+  <section class="section copy">
+    <div class="inner">
+      <p class="t-body-md">© 2026 ọjịugo · <span class="d">your cosy little bird diary</span><span class="m">your pocket field journal</span></p>
+    </div>
+  </section>
+</footer>
+
+<style>
+  .foot, .copy { background: var(--nav-glass-tint); }
+  .foot { padding-top: 100px; padding-bottom: 40px; }
+  .foot-inner { display: flex; flex-direction: column; gap: 64px; }
+  .foot-main { display: flex; flex-direction: column; gap: 32px; }
+  .foot-logo { display: inline-flex; align-items: center; gap: 12px; align-self: flex-start; }
+  .foot-logo img { width: 58px; height: 48.94px; }
+  .foot-logo span { font-weight: 600; font-size: 26.39px; line-height: 30.16px; letter-spacing: 0.38px; }
+  .foot-links { display: flex; flex-direction: column; gap: 16px; }
+  .foot-links ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 24px; color: var(--text-default); }
+  .foot-links a:hover { color: var(--text-interactive); }
+  .copy { padding-top: 40px; padding-bottom: 40px; }
+  .m { display: none; }
+  @media (max-width: 760px) {
+    .foot { padding-top: 64px; padding-bottom: 64px; }
+    .foot-inner { gap: 48px; }
+    .foot-logo { gap: 9.78px; }
+    .foot-logo img { width: 47.25px; height: 39.87px; }
+    .foot-logo span { font-size: 21.5px; line-height: 24.57px; }
+    .foot-links ul { gap: 16px; }
+    .copy { padding-top: 24px; padding-bottom: 24px; }
+    .d { display: none; } .m { display: inline; }
+  }
+</style>
