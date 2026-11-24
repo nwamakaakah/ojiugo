@@ -5,7 +5,7 @@ import { Press as Pressable } from './Press';
 import { Button, Screen, T } from './ui';
 import { Float, Pop, Rise } from './motion';
 import { OutlineButton } from './form';
-import { EmptyNest, Leaves, Sparkles } from './illustrations';
+import { LeafyNest, Leaves, Sparkles } from './illustrations';
 import { useTheme } from '../theme/ThemeProvider';
 import { space } from '../theme/tokens';
 
@@ -24,11 +24,14 @@ export function Celebrate({ art = 'sparkles', title, sub, primary, secondary, cu
   return (
     <Screen>
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg }}>
-        <Pop delay={0}><Float>
-        {art === 'sparkles' ? <Sparkles width={200} /> : art === 'leaves' ? <Leaves size={170} spin={false} /> : (
-          <View style={{ alignItems: 'center' }}><Leaves size={150} spin={false} /><View style={{ marginTop: -70 }}><EmptyNest width={150} /></View></View>
-        )}
-        </Float></Pop>
+        {/* the space is reserved up front, so the art can never sit on top of the title */}
+        <View style={{ width: 230, marginBottom: art === 'leaves' ? space.md : 0, height: art === 'sparkles' ? 200 * (103 / 223) : art === 'leaves' ? 220 * (148 / 222) : 230 * (160 / 285), alignItems: 'center' }}>
+          <Pop delay={0}><Float>
+          {art === 'sparkles' ? <Sparkles width={200} /> : art === 'leaves' ? <Leaves size={220} spin={false} /> : (
+            <LeafyNest width={230} />
+          )}
+          </Float></Pop>
+        </View>
         <Rise delay={80} style={{ alignItems: 'center', gap: space.xs, paddingHorizontal: space.xl }}>
           <T v="displayLg" style={{ fontSize: 26, lineHeight: 30, textAlign: 'center' }}>{title}</T>
           {sub ? <T v="bodyMd" color={colors.textSubtle} style={{ textAlign: 'center' }}>{sub}</T> : null}

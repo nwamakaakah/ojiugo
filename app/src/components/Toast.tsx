@@ -5,6 +5,7 @@ import { SvgXml } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius, space } from '../theme/tokens';
 import { T } from './ui';
+import { bellSvg, moonSvg, sunSvg } from './icons';
 
 type Kind = 'bell' | 'moon' | 'sun';
 type ToastMsg = { text: string; kind?: Kind; tone?: 'primary' | 'warm' | 'on' | 'off' };
@@ -12,9 +13,10 @@ const Ctx = createContext<(m: ToastMsg) => void>(() => {});
 export const useToast = () => useContext(Ctx);
 
 const icon = (k: Kind, c: string) => ({
-  bell: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${c}" stroke-width="1.2" stroke-linecap="round"><path d="M4 11.5c.7-.8 1-1.8 1-3V7a3 3 0 0 1 6 0v1.5c0 1.2.3 2.2 1 3H4Z"/><path d="M6.8 13.2c.4.5.8.7 1.2.7s.8-.2 1.2-.7"/></svg>`,
-  moon: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${c}" stroke-width="1.2" stroke-linecap="round"><path d="M10.8 2.6A5.6 5.6 0 1 0 13.4 11 4.6 4.6 0 0 1 10.8 2.6Z"/></svg>`,
-  sun: `<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${c}" stroke-width="1.2" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg>`,
+  // her exported icons (Icon Set)
+  bell: bellSvg.replace(/\{\{C\}\}/g, c),
+  moon: moonSvg.replace(/\{\{C\}\}/g, c),
+  sun: sunSvg.replace(/\{\{C\}\}/g, c),
 }[k]);
 
 /** Small pill that drops in under the header, e.g. "notifications turned on". */
@@ -41,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {msg ? (
         <Animated.View pointerEvents="none" style={[styles.wrap, { top: insets.top + 64, opacity: op, transform: [{ translateY: op.interpolate({ inputRange: [0, 1], outputRange: [-8, 0] }) }] }]}>
           <View accessibilityLiveRegion="polite" style={[styles.pill, { backgroundColor: bg, shadowColor: colors.shadow }]}>
-            {msg.kind ? <SvgXml xml={icon(msg.kind, fg)} width={14} height={14} /> : null}
+            {msg.kind ? <SvgXml xml={icon(msg.kind, fg)} width={msg.kind === 'moon' ? 14.2 : msg.kind === 'sun' ? 16.7 : 13.1} height={16} /> : null}
             <T v="ui" color={fg}>{msg.text}</T>
           </View>
         </Animated.View>

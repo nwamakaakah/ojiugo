@@ -25,6 +25,9 @@ let pushing = false;
 let retry: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<() => void>();
 
+/** Whose diary is open on this phone (null = not signed in / demo). */
+export const currentUid = () => uid;
+
 /** Screens subscribe so they redraw the moment anything changes — here or on another phone. */
 export function onEntriesChange(fn: () => void) { listeners.add(fn); return () => { listeners.delete(fn); }; }
 const emit = () => listeners.forEach((fn) => fn());

@@ -35,7 +35,7 @@ export default function Flocks() {
             <Rise i={index}>
             <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/bird', params: { name: item.name } })}
               style={({ pressed }) => [styles.card, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow, opacity: pressed ? 0.8 : 1 }]}>
-              <BirdThumb uri={item.photo} size={58} />
+              <BirdThumb uri={item.photo} focus={item.photoFocus} size={58} />
               <View style={{ flex: 1, gap: 2 }}>
                 <T v="label" style={{ fontSize: 16, lineHeight: 22 }}>{item.name}</T>
                 <T v="bodySm" color={colors.textLight}>first met {shortDate(item.firstMet)} • seen ×{item.seen}</T>

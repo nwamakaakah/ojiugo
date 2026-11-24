@@ -51,7 +51,14 @@
           ]
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ọjịugo uses your location to name the spot where you saw a bird."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

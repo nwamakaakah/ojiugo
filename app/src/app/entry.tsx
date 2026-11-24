@@ -1,5 +1,6 @@
+import { Photo } from '../components/Photo';
 import { useRef, useState, type ComponentRef } from 'react';
-import { Image, Modal, Platform, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Modal, Platform, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -9,7 +10,8 @@ import * as Sharing from 'expo-sharing';
 import { BackLink, T } from '../components/ui';
 import { Rise } from '../components/motion';
 import { BirdThumb } from '../components/BirdThumb';
-import { BirdieCard } from '../components/BirdieCard';
+import { BirdieCard, type CardStyle } from '../components/BirdieCard';
+import { Choice } from '../components/form';
 import { FeelingChip, Stamp } from '../components/form';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/Confirm';
@@ -30,6 +32,7 @@ export default function EntryDetail() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const e = useEntry(id);
   const [sharing, setSharing] = useState(false);
+  const [look, setLook] = useState<CardStyle>('leafy');
   const cardRef = useRef<ComponentRef<typeof View>>(null);
   if (!e) return <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgApp, padding: space.lg }}><BackLink />{e === null ? <T v="bodyMd" style={{ marginTop: space.xl }}>this page isn’t in your diary any more</T> : null}</SafeAreaView>;
 
@@ -69,7 +72,7 @@ export default function EntryDetail() {
         <Rise delay={60}>
         <View style={[styles.page, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
           <View style={[styles.tape, { backgroundColor: colors.softNeutralFill }]} />
-          {e.photo ? <Image source={{ uri: e.photo }} style={styles.photo} /> : <View style={[styles.photo, { backgroundColor: colors.softNeutralFill, alignItems: 'center', justifyContent: 'center' }]}>{named ? <BirdThumb size={80} /> : null}</View>}
+          {e.photo ? <Photo uri={e.photo} focus={e.photoFocus} style={styles.photo} /> : <View style={[styles.photo, { backgroundColor: colors.softNeutralFill, alignItems: 'center', justifyContent: 'center' }]}>{named ? <BirdThumb size={80} /> : null}</View>}
 
           <View style={styles.titleRow}>
             <View style={{ flex: 1, gap: 2 }}>
@@ -123,7 +126,11 @@ export default function EntryDetail() {
               <T v="displayLg" style={{ fontSize: 25, lineHeight: 30 }}>share your birdie card with others</T>
             </View>
             <ScrollView bounces={false}>
-              <View ref={cardRef} collapsable={false}><BirdieCard entry={e} width={winW} /></View>
+              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: space.sm, paddingVertical: space.md }}>
+                <Choice label="leafy" on={look === 'leafy'} onPress={() => setLook('leafy')} />
+                <Choice label="torn page" on={look === 'torn'} onPress={() => setLook('torn')} />
+              </View>
+              <View ref={cardRef} collapsable={false}><BirdieCard entry={e} width={winW} look={look} /></View>
             </ScrollView>
             <SafeAreaView edges={['bottom']} style={{ flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, paddingBottom: space.md }}>
               <Pressable accessibilityRole="button" onPress={() => setSharing(false)} style={[styles.sheetBtn, { borderWidth: 1, borderColor: colors.borderDefault }]}><T v="button">close</T></Pressable>

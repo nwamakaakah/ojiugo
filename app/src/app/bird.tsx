@@ -1,5 +1,6 @@
+import { Photo } from '../components/Photo';
 import { useState } from 'react';
-import { Image, ScrollView, StyleSheet, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { ScrollView, StyleSheet, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
@@ -22,7 +23,7 @@ export default function Bird() {
   const mystery = entryId ? all.find((e) => e.id === entryId) : undefined;
   const s = collection(all).find((x) => x.name.toLowerCase() === name.toLowerCase());
   const info = speciesInfo(name);
-  const photos = (s?.entries ?? []).map((e) => e.photo).filter(Boolean) as string[];
+  const photos = (s?.entries ?? []).filter((e) => e.photo).map((e) => ({ uri: e.photo!, focus: e.photoFocus }));
   const [slide, setSlide] = useState(0);
   const slideW = width - space.lg * 2;
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => setSlide(Math.round(e.nativeEvent.contentOffset.x / slideW));
@@ -35,14 +36,14 @@ export default function Bird() {
         <View style={{ gap: space.sm }}>
           {photos.length ? (
             <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={onScroll} style={{ borderRadius: radius.xl }}>
-              {photos.map((p) => <Image key={p} source={{ uri: p }} style={{ width: slideW, height: 240, borderRadius: radius.xl }} resizeMode="cover" />)}
+              {photos.map((p, i) => <Photo key={`${p.uri}-${i}`} uri={p.uri} focus={p.focus} style={{ width: slideW, height: 240, borderRadius: radius.xl }} />)}
             </ScrollView>
           ) : (
             <View style={[styles.photo, { backgroundColor: colors.softNeutralFill }]}><BirdThumb size={96} /></View>
           )}
           {photos.length > 1 ? (
             <View style={styles.dots}>
-              {photos.map((p, i) => <View key={p} style={[styles.dot, i === slide && styles.dotOn, { backgroundColor: i === slide ? colors.actionPrimary : colors.borderDefault }]} />)}
+              {photos.map((p, i) => <View key={i} style={[styles.dot, i === slide && styles.dotOn, { backgroundColor: i === slide ? colors.actionPrimary : colors.borderDefault }]} />)}
             </View>
           ) : null}
         </View>
@@ -93,7 +94,7 @@ export default function Bird() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.md }}>
               {s.entries.map((e) => (
                 <View key={e.id} style={{ gap: space.sm, width: 110 }}>
-                  <BirdThumb uri={e.photo} size={110} r={radius.lg} />
+                  <BirdThumb uri={e.photo} focus={e.photoFocus} size={110} r={radius.lg} />
                   <T v="caption" color={colors.textSubtle}>{shortDate(e.createdAt).toLowerCase()}{e.place ? ` • ${e.place}` : ''}</T>
                 </View>
               ))}

@@ -1,7 +1,7 @@
 import { SvgXml } from 'react-native-svg';
 import * as I from './icons';
 
-const RATIO = {eye: 1.2308, eyeSlash: 0.9327, circle: 1.0, book: 0.8981, camera: 0.9727, play: 0.8598, pen: 0.9808, search: 1.0265, plus: 1.0, chevron: 1.6617, arrow: 1.8159, back: 2.0978};
+const RATIO = {eye: 1.2308, eyeSlash: 0.9327, circle: 1.0, book: 0.8981, camera: 0.9727, play: 0.8598, pen: 0.9808, search: 1.0265, plus: 1.0, chevron: 1.6617, arrow: 1.8159, back: 2.0978, pin: 0.8276, moon: 0.8889, sun: 1.0435, bell: 0.8182};
 export type IconName = keyof typeof RATIO;
 
 /** One of the hand-drawn icons exported from Figma, recoloured. `size` is the height. */

@@ -69,7 +69,7 @@ export default function Search() {
           <Rise i={index}>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/entry', params: { id: item.id } })}
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfacePage, shadowColor: colors.shadow, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}>
-            <BirdThumb uri={item.photo} size={58} />
+            <BirdThumb uri={item.photo} focus={item.photoFocus} size={58} />
             <View style={{ flex: 1, gap: 2 }}>
               <T v="label" style={{ fontSize: 16, lineHeight: 22 }}>{item.species ?? 'Mystery bird'}</T>
               <T v="bodySm" color={colors.textLight}>{[shortDate(item.createdAt), item.place].filter(Boolean).join(' • ')}</T>

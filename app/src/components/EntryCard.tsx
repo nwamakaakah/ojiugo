@@ -1,4 +1,5 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Photo } from './Photo';
+import { StyleSheet, View } from 'react-native';
 import { Press as Pressable } from './Press';
 import { SvgXml } from 'react-native-svg';
 import { router } from 'expo-router';
@@ -22,7 +23,7 @@ export function EntryCard({ entry, index, wide }: { entry: Entry; index: number;
     <Pressable accessibilityRole="button" accessibilityLabel={`${entry.species ?? 'mystery bird'}, ${shortDate(entry.createdAt)}`}
       onPress={() => router.push({ pathname: '/entry', params: { id: entry.id } })}
       style={[styles.card, { width: '100%', height: 200, backgroundColor: tone['600'] }]}>
-      {entry.photo ? <Image source={{ uri: entry.photo }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      {entry.photo ? <Photo uri={entry.photo} focus={entry.photoFocus} style={StyleSheet.absoluteFill} />
         : <View style={styles.art}><SvgXml xml={grass} width="100%" height="100%" preserveAspectRatio="xMidYMax slice" /></View>}
       <View style={[styles.band, { backgroundColor: `${tone['700']}cc` }]}>
         <T v="label" color={sand['25']} numberOfLines={2}>{entry.species ?? 'Mystery bird'}</T>

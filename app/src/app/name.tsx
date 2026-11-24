@@ -35,7 +35,7 @@ export default function TwoToName() {
             {e.suggestion ? (
               <>
                 <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
-                  <BirdThumb uri={e.photo} size={50} r={radius.sm} />
+                  <BirdThumb uri={e.photo} focus={e.photoFocus} size={50} r={radius.sm} />
                   <T v="bodyLg" color={colors.textSubtle} style={{ flex: 1 }}>we think your {shortDate(e.createdAt).toLowerCase()} bird might be a <T v="label" style={{ fontSize: 16 }}>{e.suggestion.species}</T></T>
                 </View>
                 <Pressable accessibilityRole="button" style={btn} onPress={() => router.push({ pathname: '/bird', params: { name: e.suggestion!.species, entry: e.id } })}>
@@ -45,7 +45,7 @@ export default function TwoToName() {
             ) : (
               <>
                 <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'center' }}>
-                  <BirdThumb uri={e.photo} size={50} r={radius.sm} />
+                  <BirdThumb uri={e.photo} focus={e.photoFocus} size={50} r={radius.sm} />
                   <T v="bodyMd" color={colors.textSubtle} style={{ flex: 1 }}>{e.describe ?? e.note ?? 'no suggestion yet — know what it was?'}</T>
                 </View>
                 <Line value={typed[e.id] ?? ''} onChangeText={(t) => setTyped({ ...typed, [e.id]: t })} placeholder="name it yourself" autoCapitalize="words" />

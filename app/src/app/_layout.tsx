@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from '../theme/ThemeProvider';
 import { AuthProvider } from '../lib/auth';
 import { ToastProvider } from '../components/Toast';
 import { ConfirmProvider } from '../components/Confirm';
+import { BlurTarget, BlurTargetProvider } from '../components/BlurTarget';
 import { startSync } from '../lib/sync';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -22,6 +23,7 @@ function Root() {
   return (
     <>
       <StatusBar style={colors.isDark ? 'light' : 'dark'} />
+      <BlurTarget>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bgApp }, animation: 'ios_from_right', animationDuration: 320 }}>
         {/* the four tabs switch in place so the nav bar never moves or flickers; their content rises in on its own */}
         {TABS.map((n) => <Stack.Screen key={n} name={n} options={{ animation: 'none' }} />)}
@@ -30,6 +32,7 @@ function Root() {
         {/* little celebrations and confirmations fade up softly */}
         {MOMENTS.map((n) => <Stack.Screen key={n} name={n} options={{ animation: 'fade_from_bottom', animationDuration: 320, gestureEnabled: false }} />)}
       </Stack>
+      </BlurTarget>
     </>
   );
 }
@@ -43,11 +46,13 @@ export default function Layout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AuthProvider>
+          <BlurTargetProvider>
           <ToastProvider>
             <ConfirmProvider>
               <Root />
             </ConfirmProvider>
           </ToastProvider>
+          </BlurTargetProvider>
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>

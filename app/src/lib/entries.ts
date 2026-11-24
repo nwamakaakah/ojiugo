@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { onEntriesChange, readRows, removeRow, saveRow, type Row } from './sync';
+import { currentUid, onEntriesChange, readRows, removeRow, saveRow, type Row } from './sync';
+import { storage } from './storage';
 import type { Season } from '../theme/tokens';
 
 export const FEELINGS = ['joyful', 'awe', 'calm', 'wonder', 'proud'] as const;
@@ -24,6 +25,8 @@ export type Entry = {
   place?: string;
   coords?: string;
   photo?: string;
+  /** where the bird sits in the photo (0–1 across, 0–1 down), so every crop keeps it in frame */
+  photoFocus?: { x: number; y: number };
   note?: string;          // quick scribble note
   describe?: string;      // "describe the bird"
   more?: string;          // "care to say more?"
@@ -85,10 +88,20 @@ export function computeStats(entries: Entry[], now = new Date()): Stats {
   return { species: species.size, sightings: entries.length, thisWeek, earned };
 }
 
-/** Milestones earned by `after` that weren't earned by `before`. */
-export function newMilestones(before: Entry[], after: Entry[]): MilestoneId[] {
-  const a = computeStats(before).earned, b = computeStats(after).earned;
-  return MILESTONES.map((m) => m.id).filter((id) => !a[id] && b[id]);
+/**
+ * Milestones to celebrate after a save: earned now, and never celebrated before.
+ * Each milestone is celebrated once per diary — tearing out a page or changing a sighting's time
+ * and then earning it again doesn't bring the stamp screen back.
+ */
+export async function newMilestones(before: Entry[], after: Entry[]): Promise<MilestoneId[]> {
+  const key = `ojiugo.milestones.shown.${currentUid() ?? 'local'}`;
+  const had = computeStats(before).earned, now = computeStats(after).earned;
+  const shown = new Set<string>(await storage.get<string[]>(key, []));
+  MILESTONES.forEach((m) => { if (had[m.id]) shown.add(m.id); });          // anything already earned never counts as new
+  const fresh = MILESTONES.map((m) => m.id).filter((id) => now[id] && !shown.has(id));
+  fresh.forEach((id) => shown.add(id));
+  await storage.set(key, [...shown]);
+  return fresh;
 }
 
 /** Reloads every time the screen comes into focus, so lists stay fresh after saving. */
@@ -111,7 +124,7 @@ export function useEntry(id?: string) {
   return entry;
 }
 
-export type Species = { name: string; firstMet: string; seen: number; photo?: string; entries: Entry[] };
+export type Species = { name: string; firstMet: string; seen: number; photo?: string; photoFocus?: Entry['photoFocus']; entries: Entry[] };
 /** Group named entries into the "flocks" collection, newest species first. */
 export function collection(entries: Entry[]): Species[] {
   const map = new Map<string, Species>();
@@ -119,7 +132,7 @@ export function collection(entries: Entry[]): Species[] {
     if (!e.species) continue;
     const k = e.species.toLowerCase();
     const s = map.get(k) ?? { name: e.species, firstMet: e.createdAt, seen: 0, entries: [] };
-    s.seen++; s.entries.push(e); s.photo = s.photo ?? e.photo;
+    s.seen++; s.entries.push(e); if (!s.photo && e.photo) { s.photo = e.photo; s.photoFocus = e.photoFocus; }
     map.set(k, s);
   }
   return [...map.values()].sort((a, b) => b.firstMet.localeCompare(a.firstMet));

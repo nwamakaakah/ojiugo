@@ -66,8 +66,10 @@ export function Option({ title, note, selected, onPress }: { title: string; note
     <Pressable accessibilityRole="radio" accessibilityState={{ selected }} onPress={onPress}
       style={[styles.option, { borderColor: selected ? colors.borderDefault : colors.borderSubtle, backgroundColor: colors.surfacePage }]}>
       <View style={styles.radio}>
-        <View style={StyleSheet.absoluteFill}><Icon name="circle" color={colors.iconDefault} size={22} /></View>
-        {selected ? <View style={[styles.dot, { backgroundColor: colors.actionPrimary }]} /> : null}
+        {/* plain radio, as in the design (Settings / Theme 2012:12995): thin ring, solid sage dot when chosen */}
+        <View style={[styles.ring, { borderColor: colors.iconSubtle }]}>
+          {selected ? <View style={[styles.dot, { backgroundColor: colors.actionPrimary }]} /> : null}
+        </View>
       </View>
       <T v="label" style={{ flex: 1 }}>{title}</T>
       <T v="caption" color={colors.textSubtle}>{note}</T>
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
   rule: { height: StyleSheet.hairlineWidth },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.md, minHeight: 48 },
   option: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md, height: 52, borderRadius: radius.md, borderWidth: 1 },
-  radio: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
-  dot: { width: 13, height: 13, borderRadius: 7 },
+  radio: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+  ring: { width: 24, height: 24, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  dot: { width: 15, height: 15, borderRadius: 7.5 },
 });

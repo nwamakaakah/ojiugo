@@ -4,8 +4,9 @@ import { Press as Pressable } from '../components/Press';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackLink, Button, T } from '../components/ui';
-import { Line, OutlineButton, Plus, SearchGlyph, SectionLabel, Stamp } from '../components/form';
+import { Line, OutlineButton, Plus, SectionLabel, Stamp } from '../components/form';
 import { useToast } from '../components/Toast';
+import { PlaceField } from '../components/PlaceField';
 import { addEntry, loadEntries, newMilestones, parseStamp, stampTime } from '../lib/entries';
 import { storage } from '../lib/storage';
 import { useTheme } from '../theme/ThemeProvider';
@@ -45,7 +46,7 @@ export default function QuickScribble() {
       note: note.trim() || undefined, species: name.trim() || undefined, namedByUser: !!name.trim(), season,
     });
     if (place) await storage.set('ojiugo.lastPlace', place);
-    const earned = newMilestones(before, [...before, entry]);
+    const earned = await newMilestones(before, [...before, entry]);
     setBusy(false);
     const next = fuller ? `/write?id=${entry.id}` : '/scribble-saved';
     if (earned.length) router.replace({ pathname: '/milestone', params: { id: earned[0], next } });
@@ -74,8 +75,7 @@ export default function QuickScribble() {
           {edit === 'place' ? (
             <View style={card}>
               <T v="overline" color={colors.textSubtle}>fix your location</T>
-              <Line value={draftPlace} onChangeText={setDraftPlace} placeholder="name the spot" />
-              <Line value={draftCoords} onChangeText={setDraftCoords} placeholder="search precise coordinates" right={<SearchGlyph color={colors.iconSubtle} />} />
+              <PlaceField place={draftPlace} coords={draftCoords} onChange={(p, c) => { setDraftPlace(p); setDraftCoords(c); }} />
               <SmallButton title="save changes" onPress={savePlace} />
             </View>
           ) : null}
@@ -103,7 +103,8 @@ export default function QuickScribble() {
         <View style={{ flex: 1 }} />
         <View style={{ gap: space.md }}>
           <Button title="save scribble" onPress={() => save(false)} loading={busy} />
-          <OutlineButton title="tell the fuller story" onPress={() => save(true)} icon={<Plus color={colors.iconDefault} />} />
+          {/* straight to a full page — nothing needs typing or saving here first; anything already jotted comes along */}
+          <OutlineButton title="tell the fuller story" onPress={() => router.replace({ pathname: '/write', params: { species: name.trim(), describe: note.trim(), place, coords, when } })} icon={<Plus color={colors.iconDefault} />} />
         </View>
       </ScrollView>
     </SafeAreaView>
