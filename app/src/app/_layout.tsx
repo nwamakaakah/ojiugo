@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
+import { Platform, Pressable, Text, View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, Mali_400Regular, Mali_500Medium, Mali_600SemiBold, Mali_700Bold } from '@expo-google-fonts/mali';
@@ -11,6 +12,7 @@ import { ToastProvider } from '../components/Toast';
 import { ConfirmProvider } from '../components/Confirm';
 import { BlurTarget, BlurTargetProvider } from '../components/BlurTarget';
 import { startSync } from '../lib/sync';
+import { SoundCues } from '../lib/feedback';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -47,6 +49,7 @@ export default function Layout() {
       <ThemeProvider>
         <AuthProvider>
           <BlurTargetProvider>
+          <SoundCues />
           <ToastProvider>
             <ConfirmProvider>
               <Root />
@@ -56,5 +59,25 @@ export default function Layout() {
         </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
+  );
+}
+
+/**
+ * If any screen throws, show this instead of closing the app — with the error, so it can be reported,
+ * and a way back to the diary.
+ */
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => Promise<void> }) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 16, backgroundColor: '#F6F2E7' }}>
+      <Text style={{ fontSize: 24, fontWeight: '600', color: '#221D17' }}>a feather got stuck</Text>
+      <Text style={{ fontSize: 15, color: '#5E564A' }}>something went wrong on this page. a screenshot of the note below helps fix it.</Text>
+      <Text selectable style={{ fontSize: 12, color: '#7A6F60', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }}>{String(error?.message ?? error).slice(0, 600)}</Text>
+      <Pressable onPress={() => { retry(); }} style={{ height: 48, borderRadius: 999, backgroundColor: '#5B624A', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#FDFAF1', fontSize: 16 }}>try again</Text>
+      </Pressable>
+      <Pressable onPress={() => router.replace('/')} style={{ height: 48, borderRadius: 999, borderWidth: 1, borderColor: '#B8AE9C', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#221D17', fontSize: 16 }}>back to my diary</Text>
+      </Pressable>
+    </View>
   );
 }

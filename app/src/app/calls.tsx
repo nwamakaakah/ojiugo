@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Press as Pressable } from '../components/Press';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgXml } from 'react-native-svg';
+import { Icon } from '../components/Icon';
 import { router } from 'expo-router';
 import { ArrowIcon, T } from '../components/ui';
 import { Rise } from '../components/motion';
@@ -22,7 +22,6 @@ export default function Calls() {
   const earned = computeStats(entries).earned;
   const milestones = MILESTONES.filter((m) => earned[m.id]).reverse();
   const empty = suggestions.length === 0 && mysteries.length === 0 && milestones.length === 0;
-  const notebook = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${colors.iconDefault}" stroke-width="1.3" stroke-linecap="round"><rect x="5.5" y="3.5" width="13" height="17" rx="1.6"/><path d="M8.5 3.5v17M11 8.5h4.5M11 11.5h4.5"/></svg>`;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bgApp }} edges={['top']}>
@@ -58,7 +57,7 @@ export default function Calls() {
           {mysteries.length > 0 ? (
             <Rise i={suggestions.length}><Pressable accessibilityRole="button" onPress={() => router.push('/name')}
               style={[styles.card, styles.row, { backgroundColor: colors.surfacePage, shadowColor: colors.shadow }]}>
-              <SvgXml xml={notebook} width={24} height={24} />
+              <Icon name="book" color={colors.iconDefault} size={24} />
               <View style={{ flex: 1, gap: 2 }}>
                 <T v="ui" color={colors.textDefault}>{mysteries.length} mystery {mysteries.length === 1 ? 'bird' : 'birds'} waiting to be named</T>
                 <T v="caption" color={colors.textLight}>name them anytime</T>

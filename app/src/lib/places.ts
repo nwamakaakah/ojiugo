@@ -14,9 +14,10 @@ function toPlace(f: Feature): Place | null {
   const p = f.properties;
   const name = p.name ?? p.street ?? p.city ?? p.county ?? p.state;
   if (!name) return null;
-  const area = [p.city, p.county, p.state, p.country]
+  // town, then state — e.g. "Amawbia" · "Awka South, Anambra"
+  const area = [p.city ?? p.town ?? p.district ?? p.locality ?? p.county, p.state]
     .filter((x, i, a): x is string => !!x && x !== name && a.indexOf(x) === i)
-    .slice(0, 2).join(', ');
+    .join(', ');
   const [lon, lat] = f.geometry.coordinates;
   return { name, area, lat, lon };
 }
@@ -39,6 +40,25 @@ export async function placeAt(lat: number, lon: number): Promise<Place | null> {
   return json.features[0] ? toPlace(json.features[0]) : null;
 }
 
+/** "El Paradiso, Awka, Anambra" — the spot, its town and its state, as saved on the page. */
+export const placeLabel = (p: Place) => [p.name, ...p.area.split(', ')].filter((x, i, a) => !!x && a.indexOf(x) === i).join(', ');
+
+/** The phone's own map service names the spot first (works best on iPhone and Android); Photon is the backup. */
+async function nameHere(lat: number, lon: number): Promise<Place | null> {
+  try {
+    const [a] = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lon });
+    if (a) {
+      const town = a.city ?? a.district ?? a.subregion ?? null;
+      const spot = a.name && !/^\d+$/.test(a.name) ? a.name : a.street ?? a.district ?? town;
+      if (spot) {
+        const area = [town, a.region].filter((x, i, arr): x is string => !!x && x !== spot && arr.indexOf(x) === i).join(', ');
+        return { name: spot, area, lat, lon };
+      }
+    }
+  } catch { /* fall through to Photon */ }
+  return placeAt(lat, lon).catch(() => null);
+}
+
 /** Where the phone is now, named. Asks for permission the first time. */
 export async function placeHere(): Promise<{ place: Place | null; error?: string }> {
   const perm = await Location.requestForegroundPermissionsAsync();
@@ -46,7 +66,7 @@ export async function placeHere(): Promise<{ place: Place | null; error?: string
   try {
     const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
     const { latitude: lat, longitude: lon } = pos.coords;
-    const named = await placeAt(lat, lon).catch(() => null);
+    const named = await nameHere(lat, lon);
     return { place: named ? { ...named, lat, lon } : { name: 'where I was standing', area: '', lat, lon } };
   } catch {
     return { place: null, error: 'couldn’t find you just now — try again outside, or type the spot' };

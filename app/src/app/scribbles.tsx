@@ -8,7 +8,10 @@ import { shortDate, useEntries } from '../lib/entries';
 import { useTheme } from '../theme/ThemeProvider';
 import { primitives, radius, space } from '../theme/tokens';
 
-const TAPE = [primitives.terracotta['200'], primitives.rose['200'], primitives.plum['200'], primitives.sage['200']];
+// Washi tape, measured from Scribbles / List (Figma 2012:5231): pale peach, blush-grey and lavender strips,
+// 52 × 18, overlapping the card's top edge, stepping left → right → middle down the list.
+const TAPE = [primitives.terracotta['100'], primitives.rose['100'], primitives.plum['100']];
+const TAPE_AT = [{ left: 36, rotate: '-1.5deg' }, { right: 50, rotate: '1deg' }, { left: 146, rotate: '-0.5deg' }] as const;
 
 // Scribbles / List (Figma 2012:5231)
 export default function Scribbles() {
@@ -19,7 +22,7 @@ export default function Scribbles() {
       <FlatList
         data={list}
         keyExtractor={(e) => e.id}
-        contentContainerStyle={{ padding: space.lg, gap: space.xl }}
+        contentContainerStyle={{ paddingHorizontal: space.xl, paddingTop: space.lg, paddingBottom: space['2xl'], gap: space.xl }}
         ListHeaderComponent={
           <View style={{ gap: space.sm, marginBottom: space.sm }}>
             <BackLink />
@@ -31,12 +34,22 @@ export default function Scribbles() {
         renderItem={({ item, index }) => (
           <Rise i={index}>
           <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/write', params: { id: item.id } })}
-            style={{ backgroundColor: colors.surfacePage, borderRadius: radius.xl, padding: space.lg, gap: space.md, shadowColor: colors.shadow, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 }}>
-            <View style={{ position: 'absolute', top: -7, width: 64, height: 22, backgroundColor: TAPE[index % TAPE.length], opacity: 0.8, ...(index % 2 ? { right: 60 } : { left: 44 }) }} />
-            <T v="bodySm" color={colors.textLight}>{[shortDate(item.createdAt).toLowerCase(), item.place, item.species].filter(Boolean).join(' • ')}</T>
-            <T v="bodyLg">{item.note || 'a bird, no words yet'}</T>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.sm }}>
-              <T v="ui" color={colors.textSubtle}>finish this page</T><ArrowIcon color={colors.iconSubtle} />
+            style={{ backgroundColor: colors.surfacePage, borderRadius: 20, paddingHorizontal: space.lg, paddingTop: space.lg + 2, paddingBottom: space.xl + 2,
+              shadowColor: colors.shadow, shadowOpacity: 0.7, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 2 }}>
+            {(() => { const at = TAPE_AT[index % TAPE_AT.length]; const { rotate, ...pos } = at;
+              return <View style={{ position: 'absolute', top: -7, width: 52, height: 18, backgroundColor: TAPE[index % TAPE.length], opacity: 0.85, transform: [{ rotate }], ...pos }} />; })()}
+            {/* date • place • name, with small round dots between (as drawn) */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 6 }}>
+              {[shortDate(item.createdAt).toLowerCase(), item.place, item.species].filter(Boolean).map((bit, i) => (
+                <View key={i} style={{ flexDirection: 'row', alignItems: 'center', columnGap: 6 }}>
+                  {i ? <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: colors.textSubtle }} /> : null}
+                  <T v="ui" color={colors.textSubtle} style={{ fontSize: 13 }}>{bit}</T>
+                </View>
+              ))}
+            </View>
+            <T v="bodyLg" style={{ marginTop: space.lg, fontSize: 15.5, lineHeight: 24 }}>{item.note || 'a bird, no words yet'}</T>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.xl }}>
+              <T v="bodyMd" color={colors.textInteractive}>finish this page</T><ArrowIcon color={colors.textInteractive} />
             </View>
           </Pressable>
           </Rise>

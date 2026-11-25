@@ -8,7 +8,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { type } from '../theme/tokens';
 import { T, roomy } from './ui';
 import { Icon } from './Icon';
-import Animated, { Easing, interpolateColor, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 // "Bottom Navigation" component from Figma.
 // Colours: bar = nav/glass-fill, + button = action/primary with a surface/page ring,
@@ -28,7 +28,6 @@ const MARK_TOP = 46;  // the active marker sits just under the lifted label
 // Each tab screen draws its own bar, so remember which tab we came from;
 // the new bar then glides the marker over from there, as if it were one bar.
 let lastTab: Key | null = null;
-const glide = { duration: 260, easing: Easing.out(Easing.cubic) };
 
 export function TabBar({ active }: { active: Key }) {
   const { colors } = useTheme();
@@ -45,14 +44,23 @@ export function TabBar({ active }: { active: Key }) {
   const add = () => { spin.value = withSequence(withTiming(90, { duration: 160 }), withSpring(0, { damping: 8 })); router.push('/scribble'); };
 
   const from = lastTab ?? active;
-  const at = useSharedValue(X[from]);          // marker centre, as a share of the bar width
+  // liquid marker: its leading edge springs ahead and the trailing edge follows a beat later, so it
+  // stretches out like a drop of ink, thins as it travels, then pulls itself back into a pill
+  const head = useSharedValue(X[from]);        // marker edges, as a share of the bar width
+  const tail = useSharedValue(X[from]);
   const lift = useSharedValue(from === active ? 1 : 0);
   useEffect(() => {
-    at.value = withTiming(X[active], glide);
-    lift.value = withTiming(1, glide);
+    head.value = withSpring(X[active], { damping: 20, stiffness: 240, mass: 0.8 });
+    tail.value = withDelay(60, withSpring(X[active], { damping: 18, stiffness: 160, mass: 1 }));
+    lift.value = withSpring(1, { damping: 14, stiffness: 160 });
     lastTab = active;
-  }, [active, at, lift]);
-  const markStyle = useAnimatedStyle(() => ({ transform: [{ translateX: at.value * w - 20 }] }), [w]);
+  }, [active, head, tail, lift]);
+  const markStyle = useAnimatedStyle(() => {
+    const a = Math.min(head.value, tail.value) * w, b = Math.max(head.value, tail.value) * w;
+    const stretch = b - a;                                       // 0 at rest
+    const h = Math.max(5, 8 - stretch / 40);                     // a little thinner while it flows
+    return { width: 40 + stretch, height: h, borderRadius: h / 2, transform: [{ translateX: a - 20 }, { translateY: (8 - h) / 2 }] };
+  }, [w]);
   const ink = { off: colors.textLight, on: colors.textDefault };
   const activeLabel = useAnimatedStyle(() => ({
     color: interpolateColor(lift.value, [0, 1], [ink.off, ink.on]),

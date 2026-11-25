@@ -62,8 +62,8 @@ export function Stamp({ label, onPress, active, style }: { label: string; onPres
   const { colors } = useTheme();
   return (
     <Pressable disabled={!onPress} onPress={onPress} accessibilityRole={onPress ? 'button' : undefined}
-      style={[styles.stamp, { borderColor: active ? colors.actionPrimary : colors.borderDefault, backgroundColor: active ? colors.surfacePage : 'transparent' }, style]}>
-      <T v="ui" color={colors.textDefault}>{label}</T>
+      style={[styles.stamp, { borderColor: active ? colors.actionPrimary : colors.borderDefault, backgroundColor: active ? colors.surfacePage : 'transparent', flexShrink: 1 }, style]}>
+      <T v="ui" color={colors.textDefault} numberOfLines={1}>{label}</T>
     </Pressable>
   );
 }
@@ -88,12 +88,11 @@ export function Choice({ label, on, onPress, code }: { label: string; on: boolea
 export function FeelingChip({ feeling, on, onPress }: { feeling: Feeling; on: boolean; onPress?: () => void }) {
   const { appearance } = useTheme();
   const c = feelingColors(feeling, appearance);
-  const ring = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="${on ? c.onLabel : c.ring}" stroke-width="1.5" stroke-linecap="round"><path d="M12.4 3.2c4.9-.1 8.6 3.6 8.4 8.6-.2 4.6-3.9 8.3-8.5 8.2-4.7-.1-8.4-3.9-8.2-8.6.2-4.5 3.8-8.1 8.3-8.2"/></svg>`;
   return (
     <Boing trigger={on}>
     <Pressable haptic={!!onPress} disabled={!onPress} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={feeling} onPress={onPress}
       style={[styles.feel, { backgroundColor: on ? c.onFill : c.fill }]}>
-      <SvgXml xml={ring} width={24} height={24} />
+      <Icon name="circle" color={on ? c.onLabel : c.ring} size={22} />
       <T v="ui" color={on ? c.onLabel : c.label}>{feeling}</T>
     </Pressable>
     </Boing>

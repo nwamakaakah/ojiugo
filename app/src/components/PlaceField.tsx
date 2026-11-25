@@ -6,7 +6,7 @@ import { T } from './ui';
 import { Line } from './form';
 import { Icon } from './Icon';
 import { Press as Pressable } from './Press';
-import { formatCoords, parseCoords, placeHere, searchPlaces, type Place } from '../lib/places';
+import { formatCoords, parseCoords, placeHere, placeLabel, searchPlaces, type Place } from '../lib/places';
 import { storage } from '../lib/storage';
 import { tick } from '../lib/feedback';
 
@@ -50,7 +50,7 @@ export function PlaceField({ place, coords, onChange }: {
     tick();
     const c = formatCoords(p.lat, p.lon);
     typed.current = false;
-    onChange(p.name, c);
+    onChange(placeLabel(p), c);   // name, town, state — coordinates kept quietly alongside
     storage.set('ojiugo.lastCoords', c);
     setResults(null); setFocus(false); setNote('');
   };
@@ -71,7 +71,6 @@ export function PlaceField({ place, coords, onChange }: {
         onChangeText={(v) => { typed.current = true; onChange(v, ''); }}   // typed by hand: the old coordinates no longer belong to it
         onFocus={() => setFocus(true)} onBlur={() => setTimeout(() => setFocus(false), 150)}
         right={loading ? <ActivityIndicator size="small" color={colors.iconSubtle} /> : <Icon name="pin" color={colors.iconSubtle} size={20} />} />
-      {coords && !open ? <T v="bodySm" color={colors.textLight}>{coords}</T> : null}
       {open ? (
         <View style={{ borderRadius: radius.lg, backgroundColor: colors.surfacePage, overflow: 'hidden', borderWidth: 1, borderColor: colors.borderSubtle }}>
           <Pressable accessibilityRole="button" onPress={here} disabled={locating} style={row}>

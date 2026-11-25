@@ -6,10 +6,11 @@ import { T } from './ui';
 import { BirdThumb } from './BirdThumb';
 import { longDate, clock, type Entry } from '../lib/entries';
 import { fonts } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeProvider';
 import { eyeSvg } from './svgs';
 
 // "Shared Page" (Figma 2012:11387), measured in design points on a 393 × 574 frame and scaled to fit.
-// It's an image people share, so it keeps the daylight palette whatever theme the app is in.
+// It follows the app's look: daylight is the design as drawn; lamplight uses the matching night colours.
 const W = 393;
 export type CardStyle = 'leafy' | 'torn';
 
@@ -37,15 +38,25 @@ function tornPath(w: number, h: number) {
   return `M${pts.join('L')}Z`;
 }
 const TORN = tornPath(LAYOUT.torn.page.w, LAYOUT.torn.page.h);
-const C = {
+const DAY = {
   frame: '#F6F2E7', parchment: '#E8E3D6', page: '#FDFAF2', rule: '#EEE9DD', box: '#E9E3D7', tape: 'rgba(140,136,126,0.55)',
   ink: '#2C261F', soft: '#4A4239', dash: '#CFC8BA', foot: '#6E655B',
 };
-const foliage = require('../../assets/images/share-foliage.png');
+type Palette = typeof DAY;
+function nightPalette(c: ReturnType<typeof useTheme>['colors']): Palette {
+  return {
+    frame: c.bgApp, parchment: c.bgDesk, page: c.surfacePage, rule: c.borderSubtle, box: c.softNeutralFill,
+    tape: 'rgba(214,204,186,0.28)', ink: c.textDefault, soft: c.textSubtle, dash: c.borderDefault, foot: c.textLight,
+  };
+}
+// the leaves on a see-through background, so they sit on either look's frame colour
+const foliage = require('../../assets/images/share-foliage-clear.png');
 const RULES = [40, 86, 132, 178, 224, 270, 316, 361, 407]; // ruled lines, from the top of the page
 
 /** The shareable "meet my feathered friend" card. Give it the width it should fill. */
 export function BirdieCard({ entry, blurb, width, look = 'leafy' }: { entry: Entry; blurb?: string; width?: number; look?: CardStyle }) {
+  const { colors, appearance } = useTheme();
+  const C = appearance === 'lamplight' ? nightPalette(colors) : DAY;
   const L = LAYOUT[look];
   const H = L.H;
   const [measured, setMeasured] = useState(W);
@@ -90,8 +101,8 @@ export function BirdieCard({ entry, blurb, width, look = 'leafy' }: { entry: Ent
         ) : null}
 
         <View style={{ position: 'absolute', top: 372 * u, left: 8 * u, right: 8 * u, flexDirection: 'row', justifyContent: 'center', gap: 8 * u }}>
-          <Chip u={u} label={`${longDate(entry.createdAt)} • ${clock(entry.createdAt)}`} />
-          {entry.place ? <Chip u={u} label={entry.place} /> : null}
+          <Chip u={u} C={C} label={`${longDate(entry.createdAt)} • ${clock(entry.createdAt)}`} />
+          {entry.place ? <Chip u={u} C={C} label={entry.place} /> : null}
         </View>
       </View>
 
@@ -105,7 +116,7 @@ export function BirdieCard({ entry, blurb, width, look = 'leafy' }: { entry: Ent
   );
 }
 
-function Chip({ label, u }: { label: string; u: number }) {
+function Chip({ label, u, C }: { label: string; u: number; C: Palette }) {
   return (
     <View style={{ flexShrink: 1, height: 36 * u, paddingHorizontal: 15 * u, borderRadius: 18 * u, borderWidth: Math.max(1, u), borderStyle: 'dashed', borderColor: C.dash, justifyContent: 'center' }}>
       <T numberOfLines={1} style={{ fontFamily: fonts.regular, fontSize: 12.5 * u, color: C.ink }}>{label}</T>

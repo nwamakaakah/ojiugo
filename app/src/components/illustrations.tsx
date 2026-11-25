@@ -16,8 +16,11 @@ const loop = (v: { value: number }, ms: number, delay = 0) => {
 };
 const layer = { position: 'absolute' as const, left: 0, top: 0 };
 /** rotate around a point given in the art's own units */
-const around = (px: number, py: number, w: number, h: number, deg: number, k: number) =>
-  [{ translateX: (px - w / 2) * k }, { translateY: (py - h / 2) * k }, { rotate: `${deg}deg` }, { translateX: -(px - w / 2) * k }, { translateY: -(py - h / 2) * k }];
+// Runs inside animated styles on the UI thread, so it must be a worklet — a plain function here crashes the app on phones.
+function around(px: number, py: number, w: number, h: number, deg: number, k: number) {
+  'worklet';
+  return [{ translateX: (px - w / 2) * k }, { translateY: (py - h / 2) * k }, { rotate: `${deg}deg` }, { translateX: -(px - w / 2) * k }, { translateY: -(py - h / 2) * k }];
+}
 
 // Loading / syncing — scattered leaves (222 × 148). Loading rocks them a little more; elsewhere they sway.
 export function Leaves({ size = 140, spin = true }: { size?: number; spin?: boolean }) {
