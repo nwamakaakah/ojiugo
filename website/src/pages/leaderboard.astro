@@ -3,7 +3,6 @@
 import Base from '../layouts/Base.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { BOARD, YOU } from '../data/leaderboard';
-import Newsletter from '../components/Newsletter.astro';
 // Flip to false once real rankings come from the app.
 const COMING_SOON = true;
 const periods = [['week', 'this week'], ['month', 'this month'], ['all', 'all time']] as const;
@@ -27,8 +26,7 @@ const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 
       <img class="nest" src="/illustrations/nest.svg" alt="" width="120" height="86" />
       <p class="t-overline">coming soon</p>
       <h2>the flock is still gathering</h2>
-      <p class="t-body-lg">the leaderboard opens once the app is out and birders start logging. we’ll write to you the moment it’s live</p>
-      <div class="soon-form"><Newsletter id="soon-email" /></div>
+      <p class="t-body-lg">the leaderboard opens once the app is out and birders start logging. check back soon</p>
     </div>
   </section>
   ) : (
@@ -111,7 +109,7 @@ const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 
   .me .badge { background: #605668; color: #fdfaf1; }
   .me-r { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
   .you { padding: 3px 10px; border-radius: 999px; background: #886e3d; color: #fdfaf1; font-size: 11px; }
-  .soon { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 64px 24px; background: var(--surface-page); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
+  .soon { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 48px 24px; }
   .soon .nest { width: 120px; height: auto; margin-bottom: 8px; }
   .soon h2 { font-weight: 600; font-size: 32px; line-height: 40px; }
   .soon > .t-body-lg { max-width: 520px; }

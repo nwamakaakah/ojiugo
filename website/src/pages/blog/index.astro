@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Newsletter from '../../components/Newsletter.astro';
 import CtaBand from '../../components/CtaBand.astro';
 import CropImage from '../../components/CropImage.astro';
+import { BLOG_COMING_SOON } from '../../data/flags';
 
 const posts = (await getCollection('blog')).sort((a, b) => a.data.order - b.data.order);
 ---
@@ -13,11 +14,21 @@ const posts = (await getCollection('blog')).sort((a, b) => a.data.order - b.data
       <p class="t-overline"><span class="d">Learn about birding</span><span class="m">your cosy bird diary</span></p>
       <div class="hero-text">
         <h1>our little guide to deepen your birding habit</h1>
-        <Newsletter id="hero-email" />
+        {!BLOG_COMING_SOON && <Newsletter id="hero-email" list="blog" />}
       </div>
     </div>
   </section>
 
+  {BLOG_COMING_SOON ? (
+  <section class="section posts-wrap">
+    <div class="inner soon">
+      <img class="nest" src="/illustrations/nest.svg" alt="" width="120" height="86" />
+      <p class="t-overline">coming soon</p>
+      <h2>the ink is still drying</h2>
+      <p class="t-body-lg">we’re writing our first little guides — on noticing more birds, keeping a diary and the birds near you. check back soon</p>
+    </div>
+  </section>
+  ) : (
   <section class="section posts-wrap" aria-label="articles">
     <div class="inner posts">
       {posts.map((p, i) => (
@@ -34,6 +45,7 @@ const posts = (await getCollection('blog')).sort((a, b) => a.data.order - b.data
       ))}
     </div>
   </section>
+  )}
 
   <CtaBand />
 </Base>
@@ -53,7 +65,12 @@ const posts = (await getCollection('blog')).sort((a, b) => a.data.order - b.data
   h2 { font-weight: 600; font-size: 20px; line-height: 26px; }
   .read { padding: 8px 0; color: var(--text-interactive); }
   .m { display: none; }
+  .soon { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding: 48px 24px; }
+  .soon .nest { width: 120px; height: auto; margin-bottom: 8px; }
+  .soon h2 { font-size: 32px; line-height: 40px; }
+  .soon > .t-body-lg { max-width: 540px; }
   @media (max-width: 1024px) {
+    .soon { padding: 48px 16px; } .soon h2 { font-size: 26px; line-height: 32px; }
     .hero { padding-top: 150px; }
     .hero-inner { gap: 16px; }
     .hero-text { gap: 48px; }

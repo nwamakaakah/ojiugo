@@ -1,14 +1,14 @@
 ---
 import Arrow from './Arrow.astro';
-interface Props { id: string; }
-const { id } = Astro.props;
+interface Props { id: string; list?: string; }
+const { id, list = 'newsletter' } = Astro.props;
 ---
 <div class="nl">
   <div class="nl-text">
     <p class="nl-title">a letter now and then</p>
     <p class="t-body-md nl-copy">one cosy email a month — a bird to notice, a story, a new journal entry. no spam, ever</p>
   </div>
-  <form class="nl-form" data-newsletter novalidate>
+  <form class="nl-form" data-newsletter data-list={list} novalidate>
     <label class="field nl-field">
       <span class="t-label">YOUR EMAIL</span>
       <input class="input" id={id} name="email" type="email" autocomplete="email" required />
@@ -19,7 +19,7 @@ const { id } = Astro.props;
 </div>
 
 <script>
-  // TODO: connect to your email provider (Buttondown, ConvertKit, Mailchimp…).
+  import { saveEmail } from '../data/signup';
   document.querySelectorAll<HTMLFormElement>('form[data-newsletter]').forEach((form) => {
     const msg = form.parentElement!.querySelector<HTMLElement>('.nl-msg')!;
     const field = form.querySelector<HTMLInputElement>('input')!;
@@ -28,10 +28,13 @@ const { id } = Astro.props;
     const sync = () => { btn.disabled = !(field.value.trim() && field.checkValidity()); };
     field.addEventListener('input', () => { sync(); if (msg.dataset.state === 'error') { msg.textContent = ''; delete msg.dataset.state; } });
     sync();
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = form.querySelector<HTMLInputElement>('input')!;
       if (!input.value || !input.checkValidity()) { msg.textContent = 'that email doesn’t look quite right'; msg.dataset.state = 'error'; input.focus(); return; }
+      btn.disabled = true;
+      const ok = await saveEmail(input.value, form.dataset.list || 'newsletter');
+      if (!ok) { msg.textContent = 'couldn’t reach us just now — check your connection and try again'; msg.dataset.state = 'error'; sync(); return; }
       msg.textContent = 'lovely — your first letter is on its way soon.'; msg.dataset.state = 'ok'; form.reset(); sync();
     });
   });

@@ -3,8 +3,11 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import CropImage from '../../components/CropImage.astro';
 import { shortDate } from '../../utils';
+import { BLOG_COMING_SOON } from '../../data/flags';
 
 export async function getStaticPaths() {
+  // while the blog is "coming soon" the articles aren't published at all
+  if (BLOG_COMING_SOON) return [];
   const posts = await getCollection('blog');
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
